@@ -106,7 +106,7 @@ public class PlayerHealth : MonoBehaviour
 
     public void Heal(int segmentsGained)
     {
-        currentSegment = Mathf.Min(currentSegment + segmentsGained, maxHearts * segmentsGained);
+        currentSegment = Mathf.Min(currentSegment + segmentsGained, maxHearts * segmentsPerHeart);
     }
 
     private void GameOver()

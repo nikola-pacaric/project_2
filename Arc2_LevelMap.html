@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arc 2 — Level Map</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a1a;
+    color: #e0e0e0;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    overflow-x: hidden;
+  }
+
+  .header {
+    text-align: center;
+    padding: 30px 20px 10px;
+  }
+  .header h1 {
+    font-size: 2.2rem;
+    color: #f0c040;
+    text-shadow: 0 0 20px rgba(240, 192, 64, 0.4);
+    letter-spacing: 2px;
+  }
+  .header p {
+    color: #888;
+    margin-top: 8px;
+    font-size: 0.95rem;
+  }
+
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    padding: 16px;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: #aaa;
+  }
+  .legend-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+  }
+
+  .map-container {
+    position: relative;
+    width: 1200px;
+    height: 900px;
+    margin: 10px auto 40px;
+    border: 2px solid #222;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #0d0d20;
+  }
+
+  /* === ZONE LAYERS === */
+  .zone {
+    position: absolute;
+    border-radius: 8px;
+    border: 2px solid;
+    transition: all 0.3s ease;
+  }
+  .zone:hover {
+    filter: brightness(1.2);
+    transform: scale(1.005);
+    z-index: 10;
+  }
+
+  /* Upper / Clouds */
+  .zone-upper {
+    background: linear-gradient(180deg, #1a1a4a 0%, #12123a 100%);
+    border-color: #4a6aff;
+    box-shadow: 0 0 20px rgba(74, 106, 255, 0.15);
+  }
+
+  /* Middle / Ground */
+  .zone-middle {
+    background: linear-gradient(180deg, #1a2a1a 0%, #142014 100%);
+    border-color: #4a8a4a;
+    box-shadow: 0 0 20px rgba(74, 138, 74, 0.15);
+  }
+
+  /* Underground */
+  .zone-underground {
+    background: linear-gradient(180deg, #2a1a1a 0%, #201414 100%);
+    border-color: #aa5533;
+    box-shadow: 0 0 20px rgba(170, 85, 51, 0.15);
+  }
+
+  .zone-label {
+    position: absolute;
+    top: 8px;
+    left: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    opacity: 0.6;
+  }
+  .zone-upper .zone-label { color: #6a8aff; }
+  .zone-middle .zone-label { color: #6aaa6a; }
+  .zone-underground .zone-label { color: #cc7744; }
+
+  /* === ROOMS / AREAS === */
+  .room {
+    position: absolute;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    cursor: default;
+    transition: all 0.2s;
+  }
+  .room:hover {
+    transform: translateY(-2px);
+    z-index: 20;
+  }
+
+  .room-title {
+    font-weight: 700;
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .room-desc {
+    font-size: 0.75rem;
+    opacity: 0.75;
+    line-height: 1.35;
+  }
+
+  /* Room styles */
+  .room-start {
+    background: rgba(80, 200, 80, 0.15);
+    border: 1.5px solid #50c850;
+    color: #a0e8a0;
+  }
+  .room-puzzle {
+    background: rgba(200, 180, 50, 0.15);
+    border: 1.5px solid #c8b432;
+    color: #e8d870;
+  }
+  .room-combat {
+    background: rgba(220, 70, 70, 0.15);
+    border: 1.5px solid #dc4646;
+    color: #f0a0a0;
+  }
+  .room-boss {
+    background: rgba(200, 50, 200, 0.15);
+    border: 1.5px solid #c832c8;
+    color: #e8a0e8;
+  }
+  .room-reward {
+    background: rgba(50, 180, 220, 0.15);
+    border: 1.5px solid #32b4dc;
+    color: #a0dce8;
+  }
+  .room-gate {
+    background: rgba(255, 100, 50, 0.15);
+    border: 1.5px solid #ff6432;
+    color: #ffb090;
+  }
+  .room-transition {
+    background: rgba(150, 150, 150, 0.12);
+    border: 1.5px dashed #666;
+    color: #bbb;
+  }
+
+  /* === PATHS / ARROWS === */
+  svg.paths {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .path-main {
+    stroke: #50c850;
+    stroke-width: 2.5;
+    fill: none;
+    stroke-dasharray: 8, 4;
+    opacity: 0.6;
+  }
+  .path-unlock {
+    stroke: #32b4dc;
+    stroke-width: 2;
+    fill: none;
+    stroke-dasharray: 4, 4;
+    opacity: 0.5;
+  }
+  .path-fall {
+    stroke: #cc7744;
+    stroke-width: 2.5;
+    fill: none;
+    stroke-dasharray: 6, 4;
+    opacity: 0.6;
+  }
+  .path-jump {
+    stroke: #c832c8;
+    stroke-width: 2.5;
+    fill: none;
+    stroke-dasharray: 6, 4;
+    opacity: 0.6;
+  }
+  .path-return {
+    stroke: #f0c040;
+    stroke-width: 2.5;
+    fill: none;
+    stroke-dasharray: 10, 5;
+    opacity: 0.5;
+  }
+
+  .arrow-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    fill: currentColor;
+    text-anchor: middle;
+  }
+
+  /* === FLOW INFO === */
+  .flow-panel {
+    width: 1200px;
+    margin: 0 auto 40px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    padding: 0 10px;
+  }
+
+  .flow-card {
+    border-radius: 10px;
+    padding: 20px;
+    border: 1.5px solid;
+  }
+  .flow-card h3 {
+    font-size: 1rem;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .flow-card ol {
+    list-style: none;
+    counter-reset: step;
+    padding: 0;
+  }
+  .flow-card ol li {
+    counter-increment: step;
+    padding: 6px 0 6px 28px;
+    position: relative;
+    font-size: 0.82rem;
+    line-height: 1.4;
+    opacity: 0.85;
+  }
+  .flow-card ol li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 6px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .flow-ground {
+    background: rgba(74, 138, 74, 0.08);
+    border-color: #3a6a3a;
+  }
+  .flow-ground h3 { color: #6aaa6a; }
+  .flow-ground li::before { background: #2a4a2a; color: #6aaa6a; }
+  .flow-ground li { color: #a0c8a0; }
+
+  .flow-under {
+    background: rgba(170, 85, 51, 0.08);
+    border-color: #6a3a2a;
+  }
+  .flow-under h3 { color: #cc7744; }
+  .flow-under li::before { background: #4a2a1a; color: #cc7744; }
+  .flow-under li { color: #d0a888; }
+
+  .flow-upper {
+    background: rgba(74, 106, 255, 0.08);
+    border-color: #3a4a8a;
+  }
+  .flow-upper h3 { color: #6a8aff; }
+  .flow-upper li::before { background: #1a2a5a; color: #6a8aff; }
+  .flow-upper li { color: #a0b8e8; }
+
+  /* === DIMENSIONS === */
+  .dim-bar {
+    position: absolute;
+    font-size: 0.65rem;
+    color: #555;
+    letter-spacing: 1px;
+    font-weight: 600;
+  }
+
+  /* === LOCKED ICON === */
+  .locked::after {
+    content: "🔒";
+    font-size: 0.7rem;
+    margin-left: 4px;
+  }
+  .ability::after {
+    content: "⭐";
+    font-size: 0.7rem;
+    margin-left: 4px;
+  }
+
+  /* tooltip */
+  .tooltip {
+    position: absolute;
+    background: #1a1a2e;
+    border: 1px solid #444;
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 0.78rem;
+    color: #ccc;
+    max-width: 220px;
+    line-height: 1.4;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+
+  .note-box {
+    width: 1200px;
+    margin: 0 auto 50px;
+    background: rgba(240, 192, 64, 0.06);
+    border: 1px solid rgba(240, 192, 64, 0.2);
+    border-radius: 10px;
+    padding: 20px 24px;
+  }
+  .note-box h3 {
+    color: #f0c040;
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+  }
+  .note-box p {
+    font-size: 0.82rem;
+    color: #bba060;
+    line-height: 1.5;
+  }
+  .note-box ul {
+    list-style: none;
+    padding: 0;
+    margin-top: 8px;
+  }
+  .note-box ul li {
+    padding: 4px 0;
+    font-size: 0.82rem;
+    color: #bba060;
+  }
+  .note-box ul li::before {
+    content: "→ ";
+    color: #f0c040;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>ARC 2 — LEVEL MAP</h1>
+  <p>Metroidvania layout — Jedna scena, tri vertikalna sloja</p>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#50c850"></div> Start / Bonfire</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#c8b432"></div> Puzzle sekcija</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#dc4646"></div> Combat zona</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#c832c8"></div> Boss / Mini-boss</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#32b4dc"></div> Nagrada / Ability</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#ff6432"></div> Zaključano</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#666"></div> Prelaz</div>
+</div>
+
+<div class="map-container">
+
+  <!-- ============ UPPER / CLOUDS ZONE ============ -->
+  <div class="zone zone-upper" style="left:200px; top:20px; width:780px; height:230px;">
+    <div class="zone-label">☁ GORNJI SLOJ — In the Clouds</div>
+
+    <!-- Rooms -->
+    <div class="room room-transition" style="left:10px; top:36px; width:130px; height:70px;">
+      <div class="room-title">🪜 Uspon</div>
+      <div class="room-desc">Double jump platforma (vidljiva odozdo)</div>
+    </div>
+
+    <div class="room room-start" style="left:155px; top:36px; width:110px; height:70px;">
+      <div class="room-title">🔥 Bonfire 3</div>
+      <div class="room-desc">Checkpoint pre oblaka</div>
+    </div>
+
+    <div class="room room-puzzle" style="left:280px; top:36px; width:155px; height:80px;">
+      <div class="room-title">🧩 Puzzle C</div>
+      <div class="room-desc">Timed switches + crumbling platforms vertikalni uspon</div>
+    </div>
+
+    <div class="room room-combat" style="left:450px; top:36px; width:120px; height:70px;">
+      <div class="room-title">⚔ Combat 3</div>
+      <div class="room-desc">Leteći neprijatelji na oblacima</div>
+    </div>
+
+    <div class="room room-puzzle" style="left:450px; top:120px; width:155px; height:80px;">
+      <div class="room-title">🧩 Puzzle D</div>
+      <div class="room-desc">Finalni test: sve mehanike kombinovane</div>
+    </div>
+
+    <div class="room room-boss" style="left:620px; top:60px; width:145px; height:80px;">
+      <div class="room-title">🐉 Cloud Guardian</div>
+      <div class="room-desc">Čuvar vatrene moći (opcioni boss ili trial)</div>
+    </div>
+
+    <div class="room room-reward" style="left:620px; top:155px; width:145px; height:55px;">
+      <div class="room-title ability">🔥 FIREBALL</div>
+      <div class="room-desc">Long-range fire napad!</div>
+    </div>
+  </div>
+
+  <!-- ============ MIDDLE / GROUND ZONE ============ -->
+  <div class="zone zone-middle" style="left:20px; top:280px; width:1160px; height:250px;">
+    <div class="zone-label">🌿 SREDNJI SLOJ — Ground Level</div>
+
+    <!-- Start -->
+    <div class="room room-start" style="left:10px; top:40px; width:120px; height:70px;">
+      <div class="room-title">▶ START</div>
+      <div class="room-desc">Ulaz u Arc_2 + Bonfire 1</div>
+    </div>
+
+    <!-- Path right -->
+    <div class="room room-combat" style="left:150px; top:40px; width:120px; height:70px;">
+      <div class="room-title">⚔ Combat 1</div>
+      <div class="room-desc">Uvodne borbe, novi neprijatelji</div>
+    </div>
+
+    <div class="room room-puzzle" style="left:290px; top:40px; width:155px; height:80px;">
+      <div class="room-title">🧩 Puzzle A</div>
+      <div class="room-desc">Pressure plates + moving platforms (uvod u mehanike)</div>
+    </div>
+
+    <!-- Visible but unreachable platform -->
+    <div class="room room-gate" style="left:460px; top:30px; width:155px; height:50px;">
+      <div class="room-title locked">🔼 Platforma gore</div>
+      <div class="room-desc">Vidljiva, treba double jump!</div>
+    </div>
+
+    <div class="room room-combat" style="left:460px; top:95px; width:120px; height:60px;">
+      <div class="room-title">⚔ Combat 2</div>
+      <div class="room-desc">Teži neprijatelji</div>
+    </div>
+
+    <!-- Hole down -->
+    <div class="room room-transition" style="left:290px; top:140px; width:130px; height:65px;">
+      <div class="room-title">🕳 Rupa dole</div>
+      <div class="room-desc">Pad u underground (igrač se vraća levo)</div>
+    </div>
+
+    <!-- Far right — gate -->
+    <div class="room room-gate" style="left:850px; top:55px; width:165px; height:90px;">
+      <div class="room-title locked">🪨 Mitski Kamen</div>
+      <div class="room-desc">Blokira put ka Arc_3. Treba FIREBALL da se sruši!</div>
+    </div>
+
+    <div class="room room-start" style="left:1035px; top:70px; width:105px; height:60px;">
+      <div class="room-title">🚪 → Arc 3</div>
+      <div class="room-desc">Izlaz ka sledećem arku</div>
+    </div>
+
+    <!-- exploration between combat and gate -->
+    <div class="room room-combat" style="left:620px; top:80px; width:110px; height:55px;">
+      <div class="room-title">⚔ Patrol</div>
+      <div class="room-desc">Patrolni neprijatelji</div>
+    </div>
+
+    <div class="room room-start" style="left:740px; top:80px; width:95px; height:55px;">
+      <div class="room-title">🔥 Bonfire 4</div>
+      <div class="room-desc">Pre mitskog kamena</div>
+    </div>
+
+    <!-- Return path indicator -->
+    <div class="room room-transition" style="left:620px; top:155px; width:200px; height:45px;">
+      <div class="room-title" style="font-size:0.75rem; opacity:0.6;">← Sa FIREBALL-om, vrati se desno i sruši kamen →</div>
+    </div>
+  </div>
+
+  <!-- ============ UNDERGROUND ZONE ============ -->
+  <div class="zone zone-underground" style="left:60px; top:560px; width:850px; height:230px;">
+    <div class="zone-label">⛏ DONJI SLOJ — Underground Tunnels</div>
+
+    <!-- Entry -->
+    <div class="room room-transition" style="left:230px; top:35px; width:120px; height:60px;">
+      <div class="room-title">⬇ Ulaz</div>
+      <div class="room-desc">Pad iz rupe gore</div>
+    </div>
+
+    <div class="room room-start" style="left:100px; top:40px; width:115px; height:55px;">
+      <div class="room-title">🔥 Bonfire 2</div>
+      <div class="room-desc">Underground checkpoint</div>
+    </div>
+
+    <div class="room room-puzzle" style="left:365px; top:35px; width:155px; height:80px;">
+      <div class="room-title">🧩 Puzzle B</div>
+      <div class="room-desc">Pushable boxes na pressure plates u mraku</div>
+    </div>
+
+    <div class="room room-combat" style="left:535px; top:35px; width:120px; height:65px;">
+      <div class="room-title">⚔ Underground</div>
+      <div class="room-desc">Podzemni neprijatelji, zmije, šišmiši</div>
+    </div>
+
+    <div class="room room-boss" style="left:400px; top:130px; width:170px; height:80px;">
+      <div class="room-title">💀 MINI BOSS</div>
+      <div class="room-desc">Boss arena — pobedi ga za double jump!</div>
+    </div>
+
+    <div class="room room-reward" style="left:590px; top:140px; width:145px; height:65px;">
+      <div class="room-title ability">⬆⬆ DOUBLE JUMP</div>
+      <div class="room-desc">Nova sposobnost otključana!</div>
+    </div>
+
+    <div class="room room-transition" style="left:750px; top:140px; width:90px; height:55px;">
+      <div class="room-title">🔼 Izlaz</div>
+      <div class="room-desc">Vodi nazad na ground</div>
+    </div>
+  </div>
+
+  <!-- ============ SVG PATHS ============ -->
+  <svg class="paths" viewBox="0 0 1200 900">
+    <defs>
+      <marker id="arrow-green" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#50c850" opacity="0.7"/>
+      </marker>
+      <marker id="arrow-orange" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#cc7744" opacity="0.7"/>
+      </marker>
+      <marker id="arrow-purple" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#c832c8" opacity="0.7"/>
+      </marker>
+      <marker id="arrow-blue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#32b4dc" opacity="0.7"/>
+      </marker>
+      <marker id="arrow-gold" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#f0c040" opacity="0.7"/>
+      </marker>
+    </defs>
+
+    <!-- 1) Ground: START → right through combat → puzzle A -->
+    <path d="M 150,345 L 168,345" class="path-main" marker-end="url(#arrow-green)"/>
+    <path d="M 290,345 L 308,345" class="path-main" marker-end="url(#arrow-green)"/>
+
+    <!-- 2) Ground: Go right, see locked platform, continue to gate area -->
+    <path d="M 465,380 L 500,380 L 580,420" class="path-main" marker-end="url(#arrow-green)"/>
+    <path d="M 600,375 L 638,375" class="path-main" marker-end="url(#arrow-green)"/>
+    <path d="M 750,390 L 758,390" class="path-main" marker-end="url(#arrow-green)"/>
+
+    <!-- 3) Ground → Back to hole → fall down -->
+    <path d="M 355,400 L 355,430 L 355,560" class="path-fall" marker-end="url(#arrow-orange)"/>
+    <text x="370" y="500" class="arrow-label" style="fill:#cc7744">PAD ↓</text>
+
+    <!-- 4) Underground path: entry → bonfire → puzzle B → combat → boss -->
+    <path d="M 350,625 L 365,625" class="path-fall"/>
+    <path d="M 220,630 L 235,630" class="path-fall"/>
+    <path d="M 520,640 L 535,640" class="path-fall" marker-end="url(#arrow-orange)"/>
+
+    <!-- 5) Boss → Double Jump reward -->
+    <path d="M 570,730 L 608,730" class="path-jump" marker-end="url(#arrow-purple)"/>
+
+    <!-- 6) Underground exit → back up to ground -->
+    <path d="M 855,720 L 900,720 L 900,500 L 580,500 L 580,380" class="path-jump" marker-end="url(#arrow-purple)"/>
+    <text x="910" y="600" class="arrow-label" style="fill:#c832c8; writing-mode:vertical-lr">USPON ↑</text>
+
+    <!-- 7) Double jump to upper platform -->
+    <path d="M 530,310 L 530,250 L 400,250 L 400,120" class="path-jump" marker-end="url(#arrow-purple)"/>
+    <text x="440" y="225" class="arrow-label" style="fill:#c832c8; font-size:0.65rem">DOUBLE JUMP ⬆⬆</text>
+
+    <!-- 8) Upper: through puzzles to fireball -->
+    <path d="M 330,75 L 398,75" class="path-unlock" marker-end="url(#arrow-blue)"/>
+    <path d="M 455,76 L 468,76" class="path-unlock" marker-end="url(#arrow-blue)"/>
+    <path d="M 605,170 L 638,175" class="path-unlock" marker-end="url(#arrow-blue)"/>
+
+    <!-- 9) Fireball acquired → return down to ground → destroy stone -->
+    <path d="M 780,205 L 820,205 L 1050,205 L 1050,280 L 920,330" class="path-return" marker-end="url(#arrow-gold)"/>
+    <text x="970" y="250" class="arrow-label" style="fill:#f0c040; font-size:0.65rem">🔥 FIREBALL → Sruši kamen</text>
+
+    <!-- 10) Through gate to Arc 3 -->
+    <path d="M 1035,385 L 1053,385" class="path-main" marker-end="url(#arrow-green)"/>
+  </svg>
+
+  <!-- Dimension indicators -->
+  <div class="dim-bar" style="bottom:860px; left:20px; width:1160px; text-align:center; border-top:1px solid #333; padding-top:4px;">
+    ~200+ tiles širine (ground level)
+  </div>
+</div>
+
+<!-- ============ FLOW CARDS ============ -->
+<div class="flow-panel">
+
+  <div class="flow-card flow-ground">
+    <h3>🌿 Faza 1: Ground (početak)</h3>
+    <ol>
+      <li>Igrač ulazi u Arc_2, bonfire na startu</li>
+      <li>Borba sa novim neprijateljima — uči njihove obrasce</li>
+      <li><strong>Puzzle A:</strong> Pressure plates + moving platforms — uvod u nove mehanike</li>
+      <li>Vidi platformu iznad — ne može je dohvatiti (treba double jump)</li>
+      <li>Nastavlja desno, vidi mitski kamen — ne može ga srušiti (treba fireball)</li>
+      <li>Vraća se levo, nalazi rupu — pada u underground</li>
+    </ol>
+  </div>
+
+  <div class="flow-card flow-under">
+    <h3>⛏ Faza 2: Underground</h3>
+    <ol>
+      <li>Sleteo u tunele, bonfire odmah na ulasku</li>
+      <li><strong>Puzzle B:</strong> Gura boxove na pressure plates u mračnom okruženju</li>
+      <li>Borba sa podzemnim neprijateljima (zmije, šišmiši, slime)</li>
+      <li><strong>Mini Boss Arena</strong> — pobedi bossa</li>
+      <li>Nagrada: DOUBLE JUMP otključan!</li>
+      <li>Izlaz iz tunela — vraća se na ground level</li>
+    </ol>
+  </div>
+
+  <div class="flow-card flow-upper">
+    <h3>☁ Faza 3: Oblaci (gore)</h3>
+    <ol>
+      <li>Sada koristi double jump da skoči na platformu koju je video ranije</li>
+      <li>Bonfire na ulasku u gornji sloj</li>
+      <li><strong>Puzzle C:</strong> Timed switches + crumbling platforms — vertikalni uspon</li>
+      <li>Borba sa letećim neprijateljima na oblacima</li>
+      <li><strong>Puzzle D:</strong> Finalni puzzle — sve mehanike kombinovane</li>
+      <li>Cloud Guardian (boss/trial) → FIREBALL sposobnost!</li>
+      <li>Spusti se dole, sruši mitski kamen, prolaz ka Arc_3</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ============ NOTES ============ -->
+<div class="note-box">
+  <h3>📐 Predložene dimenzije za Tilemap</h3>
+  <p>Cela scena u jednom Tilemap-u, tri vertikalna sloja:</p>
+  <ul>
+    <li><strong>Ground level:</strong> ~200 tiles širina × ~30 tiles visina — glavni koridor, najširi deo</li>
+    <li><strong>Underground:</strong> ~160 tiles širina × ~40 tiles visina — uži tuneli, ali dublji vertikalno</li>
+    <li><strong>Upper/Clouds:</strong> ~150 tiles širina × ~45 tiles visina — vertikalniji, uspon dominira</li>
+    <li><strong>Ukupna scena:</strong> otprilike ~220 × ~120 tiles (sa praznim prostorom između slojeva)</li>
+    <li><strong>Bonfire-ovi:</strong> 4 ukupno — start, underground ulaz, pre oblaka, pre mitskog kamena</li>
+  </ul>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Arc 2 — Underground Tunnel</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #fff; font-family: 'Segoe UI', system-ui, sans-serif; color: #111; }
+
+  .header {
+    text-align: center;
+    padding: 18px 20px 10px;
+    border-bottom: 2px solid #111;
+  }
+  .header h1 { font-size: 1.4rem; letter-spacing: 1px; }
+  .header p  { font-size: 0.8rem; color: #666; margin-top: 4px; }
+
+  .legend {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 18px;
+    padding: 12px 16px;
+    background: #fafafa;
+    border-bottom: 1px solid #ddd;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: #333; }
+  .swatch { width: 16px; height: 16px; border: 1px solid #aaa; flex-shrink: 0; }
+
+  .scroll-wrapper { overflow: auto; padding: 20px; }
+
+  .controls {
+    position: fixed;
+    bottom: 18px; right: 18px;
+    display: flex; gap: 6px;
+    z-index: 50;
+  }
+  .controls button {
+    padding: 7px 13px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    border: 2px solid #111;
+    background: #fff;
+    cursor: pointer;
+  }
+  .controls button:hover { background: #f0f0f0; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>ARC 2 — UNDERGROUND TUNNEL</h1>
+  <p>160 × 40 tiles &nbsp;·&nbsp; 1 tile = 1 Unity unit &nbsp;·&nbsp; Side-scrolling platformer</p>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="swatch" style="background:#111"></div> Solid ground / wall</div>
+  <div class="legend-item"><div class="swatch" style="background:#555"></div> One-way platform</div>
+  <div class="legend-item"><div class="swatch" style="background:#ee2222"></div> Spikes / death zone</div>
+  <div class="legend-item"><div class="swatch" style="background:#ff9900"></div> Bonfire checkpoint</div>
+  <div class="legend-item"><div class="swatch" style="background:#22aa22"></div> Spawn / exit</div>
+  <div class="legend-item"><div class="swatch" style="background:#4488ff"></div> Puzzle element</div>
+  <div class="legend-item"><div class="swatch" style="background:#aa44ff"></div> Boss / locked gate</div>
+  <div class="legend-item"><div class="swatch" style="background:#ffaa00"></div> Enemy spawn</div>
+  <div class="legend-item"><div class="swatch" style="background:#00cccc"></div> Collectable</div>
+</div>
+
+<div class="scroll-wrapper">
+  <canvas id="c"></canvas>
+</div>
+
+<div class="controls">
+  <button onclick="zoom(2)">Zoom +</button>
+  <button onclick="zoom(-2)">Zoom −</button>
+  <button onclick="resetZoom()">Reset</button>
+</div>
+
+<script>
+const COLS = 160, ROWS = 40;
+let T = 8; // tile size px
+
+// ── Tile type constants ──────────────────────────────
+const E = 0;   // empty / air
+const S = 1;   // solid
+const P = 2;   // one-way platform
+const D = 3;   // spikes / danger
+const B = 4;   // bonfire
+const G = 5;   // spawn / exit (green)
+const Z = 6;   // puzzle (blue)
+const L = 7;   // boss / locked (purple)
+const N = 8;   // enemy (orange)
+const C = 9;   // collectable (cyan)
+
+const COLORS = ['#ffffff','#111111','#555555','#ee2222','#ff9900',
+                '#22aa22','#4488ff','#aa44ff','#ffaa00','#00cccc'];
+
+// ── Map ──────────────────────────────────────────────
+const map = Array.from({length: ROWS}, () => new Array(COLS).fill(E));
+
+function fill(r1,c1,r2,c2,t){ for(let r=r1;r<=r2;r++) for(let c=c1;c<=c2;c++) if(r>=0&&r<ROWS&&c>=0&&c<COLS) map[r][c]=t; }
+function hline(r,c1,c2,t){ for(let c=c1;c<=c2;c++) if(c>=0&&c<COLS&&r>=0&&r<ROWS) map[r][c]=t; }
+function vline(c,r1,r2,t){ for(let r=r1;r<=r2;r++) if(r>=0&&r<ROWS&&c>=0&&c<COLS) map[r][c]=t; }
+function set(r,c,t){ if(r>=0&&r<ROWS&&c>=0&&c<COLS) map[r][c]=t; }
+
+// ═══════════════════════════════════════════════════
+// SECTION 1 — ENTRY SHAFT  (cols 0-14)
+// Player falls from the hole in the Ground level above
+// ═══════════════════════════════════════════════════
+
+// Outer border — left wall + ceiling (ceiling has the entry hole)
+fill(0, 0, 39, 1, S);           // left wall
+hline(0, 2, 5, S);              // ceiling left of hole
+hline(0, 10, 159, S);           // ceiling continues (hole is cols 6-9)
+fill(0, 6, 2, 9, E);            // entry hole opening
+
+// Shaft walls
+vline(5, 0, 20, S);
+vline(10, 0, 20, S);
+
+// Landing ledges inside shaft to slow the fall
+hline(8, 6,  8, P);
+hline(14, 7, 9, P);
+hline(18, 6, 8, P);
+
+// Bottom of shaft opens into the main tunnel floor
+fill(32, 0, 39, 14, S);         // solid floor under shaft
+fill(20, 2, 31, 4, S);          // left wall of shaft continuation
+fill(20, 11, 31, 13, S);        // right wall of shaft continuation
+
+// Entry bonfire — igrač odmah ima checkpoint
+set(31, 6, G);   // landing spot
+set(31, 8, B);   // Bonfire 2
+
+// ═══════════════════════════════════════════════════
+// SECTION 2 — SNAKE CAVERN  (cols 14-58)
+// Narrow winding tunnels, snakes on ground and ledges
+// ═══════════════════════════════════════════════════
+
+// Main tunnel floor and ceiling
+hline(32, 14, 58, S);           // ground floor row 32
+hline(33, 14, 58, S);
+hline(34, 14, 58, S);
+fill(35, 14, 39, 58, S);        // below floor solid
+hline(14, 14, 58, S);           // low ceiling — tunnels feel tight
+hline(15, 14, 58, S);
+
+// Outer top and bottom full solid fill
+fill(0, 14, 1, 58, S);          // top solid
+fill(36, 14, 39, 58, S);        // bottom solid
+
+// Left connector wall
+fill(0, 13, 39, 13, S);
+
+// Uneven ceiling stalactites (drops down)
+fill(2, 20, 6, 21, S);
+fill(2, 30, 5, 31, S);
+fill(2, 42, 7, 43, S);
+fill(2, 52, 4, 53, S);
+
+// Mid-level platforms (snakes patrol these)
+hline(24, 16, 24, P);           // short ledge
+hline(22, 28, 33, P);           // longer mid ledge
+hline(19, 36, 44, P);           // high ledge — bats start here too
+hline(25, 48, 56, P);           // low ledge near ground
+
+// Spike pits in floor
+hline(32, 22, 25, E);  hline(33, 22, 25, E);
+hline(32, 22, 25, D);           // spikes in pit 1
+fill(33, 22, 39, 25, S);
+
+hline(32, 38, 41, E);  hline(33, 38, 41, E);
+hline(32, 38, 41, D);           // spikes in pit 2
+fill(33, 38, 39, 41, S);
+
+hline(32, 50, 52, E);  hline(33, 50, 52, E);
+hline(32, 50, 52, D);           // spike pit 3
+fill(33, 50, 39, 52, S);
+
+// Wall spike traps (side walls)
+fill(16, 17, 19, 17, D);        // left wall spikes
+fill(16, 57, 19, 57, D);        // right wall spikes before next section
+
+// Snake enemies
+set(31, 17, N);   // ground snake 1
+set(23, 30, N);   // ledge snake
+set(18, 38, N);   // high ledge snake
+set(31, 44, N);   // ground snake 2
+set(24, 50, N);   // low ledge snake
+set(31, 55, N);   // ground snake, near exit
+
+// Collectables on ledges (reward exploring)
+set(21, 31, C);
+set(21, 32, C);
+set(18, 40, C);
+set(18, 42, C);
+set(30, 45, C);
+
+// ═══════════════════════════════════════════════════
+// SECTION 3 — PUZZLE B (cols 58-100)
+// Pushable boxes on pressure plates → opens gate to boss
+// Open area, ceiling higher here
+// ═══════════════════════════════════════════════════
+
+// Floor
+fill(32, 58, 39, 100, S);
+fill(0, 58, 3, 100, S);         // high ceiling — more vertical space
+
+// Walls
+vline(58, 0, 39, S);
+vline(100, 0, 39, S);
+
+// Dividing inner walls that create box-pushing corridors
+fill(4, 65, 28, 66, S);         // inner wall 1 (with gap)
+fill(8, 65, 28, 65, E);         // gap in wall 1
+fill(4, 80, 24, 81, S);         // inner wall 2
+fill(12, 80, 24, 80, E);        // gap in wall 2
+fill(4, 93, 20, 94, S);         // inner wall 3
+fill(14, 93, 20, 93, E);        // gap in wall 3
+
+// Platforms for vertical access
+hline(20, 60, 64, P);
+hline(16, 68, 78, P);
+hline(22, 83, 91, P);
+hline(12, 60, 63, P);
+
+// Boxes (3 pushable boxes — blue)
+set(31, 62, Z);   // box 1
+set(31, 73, Z);   // box 2
+set(31, 88, Z);   // box 3
+
+// Pressure plates (matching blue, on floor)
+set(31, 70, Z);   // plate 1 target
+set(31, 84, Z);   // plate 2 target
+set(31, 97, Z);   // plate 3 target — near gate
+
+// Gate that opens when all 3 plates are active
+fill(4, 98, 31, 99, L);         // locked gate — purple vertical bar
+fill(4, 98, 8, 99, E);          // doorway stays clear at top (visual)
+
+// Snake left over in puzzle room
+set(31, 78, N);
+// A bat hanging from ceiling
+set(5, 71, N);
+
+// Collectables hidden on high platforms
+set(11, 61, C);
+set(15, 69, C);
+set(15, 76, C);
+
+// ═══════════════════════════════════════════════════
+// SECTION 4 — TRANSITION CORRIDOR  (cols 100-118)
+// After gate opens — leads to boss arena, gets tighter
+// ═══════════════════════════════════════════════════
+
+fill(32, 100, 39, 118, S);      // floor
+fill(0, 100, 5, 118, S);        // ceiling
+vline(100, 0, 39, S);
+
+// Narrow squeeze — ceiling drops in middle
+fill(6, 107, 12, 112, S);       // stalactite block
+fill(26, 107, 31, 112, S);      // floor bump
+hline(25, 107, 112, D);         // spikes on floor bump
+
+// Bat cluster before boss — warning zone
+set(9, 102, N);
+set(8, 106, N);
+set(7, 110, N);
+set(9, 115, N);
+
+// Collectables — reward before hard fight
+set(18, 104, C);
+set(18, 109, C);
+set(18, 114, C);
+
+// ═══════════════════════════════════════════════════
+// SECTION 5 — BOSS ARENA  (cols 118-159)
+// Large open room, high ceiling, boss platform in center
+// ═══════════════════════════════════════════════════
+
+fill(32, 118, 39, 159, S);      // arena floor
+fill(36, 118, 39, 159, S);      // floor depth
+fill(0, 118, 2, 159, S);        // ceiling
+
+// Arena walls
+vline(118, 0, 39, S);
+vline(159, 0, 39, S);
+
+// Floor spikes at edges of arena (punishes bad positioning)
+hline(32, 120, 123, D);
+hline(32, 154, 157, D);
+
+// Raised boss platform in center
+fill(26, 133, 28, 146, S);      // boss platform
+set(25, 135, L);                // boss spawn (purple — special enemy)
+set(25, 138, L);
+set(25, 141, L);
+set(25, 144, L);
+
+// Flanking platforms (player combat positions)
+hline(22, 120, 130, P);         // left high platform
+hline(22, 149, 157, P);         // right high platform
+hline(16, 124, 134, P);         // upper left
+hline(16, 146, 156, P);         // upper right
+hline(10, 132, 147, P);         // topmost platform (aerial play)
+
+// Under-boss hazard (spikes under the platform)
+hline(29, 133, 146, D);
+fill(30, 133, 31, 146, S);
+
+// Exit — top right, locked until boss dies
+fill(2, 154, 18, 158, S);       // right wall of arena
+fill(3, 154, 17, 157, E);       // doorway
+hline(2, 154, 158, S);          // seal
+set(12, 155, G);                // exit marker — leads back up to Ground
+set(10, 156, G);
+fill(2, 155, 11, 157, E);       // exit shaft
+
+// Exit shaft goes upward (off-canvas top — back to ground level)
+fill(0, 154, 1, 157, E);        // hole in ceiling = exit up
+
+// Arena collectables (risk/reward near boss)
+set(21, 122, C);
+set(21, 155, C);
+set(9, 135, C);
+set(9, 143, C);
+
+// ═══════════════════════════════════════════════════
+// BORDERS — make sure all edges are sealed
+// ═══════════════════════════════════════════════════
+hline(39, 0, 159, S);           // absolute bottom
+vline(159, 0, 39, S);           // absolute right
+
+// ═══════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+
+const sections = [
+  { c: 7,   label: 'ENTRY SHAFT',      sub: 'Fall from Ground' },
+  { c: 33,  label: 'SNAKE CAVERN',     sub: 'Narrow tunnels, snakes' },
+  { c: 76,  label: 'PUZZLE B',         sub: 'Push boxes onto plates' },
+  { c: 108, label: 'CORRIDOR',         sub: 'Bats + squeeze' },
+  { c: 136, label: 'BOSS ARENA',       sub: 'Mini boss fight' },
+];
+
+const annotations = [
+  { c: 7,   r: 4,  text: '⬇ Entry from\nGround level', color: '#22aa22' },
+  { c: 8,   r: 30, text: '🔥 Bonfire 2',               color: '#ff9900' },
+  { c: 23,  r: 26, text: '🐍 Snakes patrol\nledges',   color: '#ffaa00' },
+  { c: 65,  r: 6,  text: '📦 Push 3 boxes\nonto plates\nto open gate', color: '#4488ff' },
+  { c: 97,  r: 5,  text: '🔒 Gate opens\nwhen all 3\nplates active', color: '#aa44ff' },
+  { c: 108, r: 5,  text: '🦇 Bat warning\nzone',        color: '#ffaa00' },
+  { c: 139, r: 22, text: '💀 MINI BOSS',                color: '#aa44ff' },
+  { c: 155, r: 8,  text: '⬆ Exit up to\nGround level\n(Double Jump!)', color: '#22aa22' },
+];
+
+function render() {
+  canvas.width  = COLS * T;
+  canvas.height = ROWS * T;
+
+  // Background
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Grid lines
+  if (T >= 5) {
+    ctx.strokeStyle = '#e8e8e8';
+    ctx.lineWidth = 0.5;
+    for (let r = 0; r <= ROWS; r++) {
+      ctx.beginPath(); ctx.moveTo(0, r*T); ctx.lineTo(COLS*T, r*T); ctx.stroke();
+    }
+    for (let c = 0; c <= COLS; c++) {
+      ctx.beginPath(); ctx.moveTo(c*T, 0); ctx.lineTo(c*T, ROWS*T); ctx.stroke();
+    }
+  }
+
+  // Tiles
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const t = map[r][c];
+      if (t !== E) {
+        ctx.fillStyle = COLORS[t];
+        ctx.fillRect(c*T, r*T, T, T);
+      }
+    }
+  }
+
+  // Section dividers
+  ctx.setLineDash([5, 4]);
+  ctx.strokeStyle = '#ccc';
+  ctx.lineWidth = 1;
+  [14, 58, 100, 118].forEach(c => {
+    ctx.beginPath(); ctx.moveTo(c*T, 0); ctx.lineTo(c*T, ROWS*T); ctx.stroke();
+  });
+  ctx.setLineDash([]);
+
+  // Section labels
+  if (T >= 5) {
+    sections.forEach(s => {
+      const x = s.c * T;
+      ctx.textAlign = 'center';
+      ctx.font = `bold ${Math.max(8, T * 1.3)}px 'Segoe UI', sans-serif`;
+      ctx.fillStyle = '#aaa';
+      ctx.fillText(s.label, x, 5 * T);
+      ctx.font = `${Math.max(6, T * 0.95)}px 'Segoe UI', sans-serif`;
+      ctx.fillStyle = '#ccc';
+      ctx.fillText(s.sub, x, 6.5 * T);
+    });
+
+    // Annotations
+    annotations.forEach(a => {
+      ctx.textAlign = 'center';
+      const lines = a.text.split('\n');
+      lines.forEach((line, i) => {
+        ctx.font = `bold ${Math.max(6, T * 0.95)}px 'Segoe UI', sans-serif`;
+        ctx.fillStyle = a.color;
+        ctx.fillText(line, a.c * T, (a.r + i * 1.5) * T);
+      });
+    });
+  }
+}
+
+function zoom(delta) {
+  T = Math.max(3, Math.min(20, T + delta));
+  render();
+}
+function resetZoom() { T = 8; render(); }
+
+render();
+</script>
+</body>
+</html>

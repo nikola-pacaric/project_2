@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arc 2 — Middle Layer Tilemap</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #fff;
+    color: #111;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+  }
+
+  .header {
+    text-align: center;
+    padding: 20px;
+    border-bottom: 2px solid #111;
+  }
+  .header h1 { font-size: 1.5rem; }
+  .header p { font-size: 0.85rem; color: #666; margin-top: 4px; }
+
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 14px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid #ccc;
+    background: #fafafa;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    color: #333;
+  }
+  .legend-swatch {
+    width: 18px;
+    height: 18px;
+    border: 1px solid #999;
+  }
+
+  .scroll-wrapper {
+    overflow-x: auto;
+    overflow-y: auto;
+    padding: 20px;
+    max-height: calc(100vh - 140px);
+  }
+
+  .grid-container {
+    position: relative;
+    display: inline-block;
+  }
+
+  canvas {
+    display: block;
+    border: 2px solid #111;
+  }
+
+  .controls {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    gap: 8px;
+    z-index: 100;
+  }
+  .controls button {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    border: 2px solid #111;
+    background: #fff;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .controls button:hover { background: #eee; }
+
+  .section-labels {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>ARC 2 — SREDNJI SLOJ (Ground Level) — Tilemap Layout</h1>
+  <p>Svaka kockica = 1 tile (1×1 Unity unit) · Ukupno ~200×35 tiles · Crno = solid ground, belo = prazno</p>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-swatch" style="background:#111"></div> Solid Ground / Zid</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#555"></div> Platforma (one-way)</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#e22"></div> Opasnost / Death Zone</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#f90"></div> Bonfire checkpoint</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#2a2"></div> Igrač spawn / pozicija</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#48f"></div> Puzzle element</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#a4f"></div> Zaključano (double jump / fireball)</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#fa0"></div> Neprijatelj pozicija</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#0cc"></div> Collectable / Gem</div>
+</div>
+
+<div class="scroll-wrapper">
+  <div class="grid-container">
+    <canvas id="tilemap"></canvas>
+  </div>
+</div>
+
+<div class="controls">
+  <button onclick="zoomIn()">Zoom +</button>
+  <button onclick="zoomOut()">Zoom −</button>
+  <button onclick="resetZoom()">Reset</button>
+</div>
+
+<script>
+const COLS = 200;
+const ROWS = 35;
+let TILE = 7;
+const canvas = document.getElementById('tilemap');
+const ctx = canvas.getContext('2d');
+
+// Tile types
+const E = 0;  // Empty
+const S = 1;  // Solid ground
+const P = 2;  // Platform (one-way)
+const D = 3;  // Death zone / spikes
+const B = 4;  // Bonfire
+const G = 5;  // Player / green marker
+const Z = 6;  // Puzzle element (blue)
+const L = 7;  // Locked (purple) - needs ability
+const N = 8;  // Enemy position (orange)
+const C = 9;  // Collectable / gem (cyan)
+const W = 10; // Wall (solid, vertical)
+
+const COLORS = {
+  [E]: '#ffffff',
+  [S]: '#111111',
+  [P]: '#555555',
+  [D]: '#ee2222',
+  [B]: '#ff9900',
+  [G]: '#22aa22',
+  [Z]: '#4488ff',
+  [L]: '#aa44ff',
+  [N]: '#ffaa00',
+  [C]: '#00cccc',
+  [W]: '#111111',
+};
+
+// Build the tilemap row by row (0=top, 34=bottom)
+// Ground level is row ~25-34 (bottom), ceiling around row 0-5
+const map = [];
+for (let r = 0; r < ROWS; r++) {
+  map[r] = new Array(COLS).fill(E);
+}
+
+// Helper: fill a rectangle
+function fillRect(r1, c1, r2, c2, type) {
+  for (let r = r1; r <= r2 && r < ROWS; r++) {
+    for (let c = c1; c <= c2 && c < COLS; c++) {
+      if (r >= 0 && c >= 0) map[r][c] = type;
+    }
+  }
+}
+// Helper: set single tile
+function set(r, c, type) {
+  if (r >= 0 && r < ROWS && c >= 0 && c < COLS) map[r][c] = type;
+}
+// Helper: horizontal line
+function hline(r, c1, c2, type) {
+  for (let c = c1; c <= c2 && c < COLS; c++) {
+    if (r >= 0 && r < ROWS && c >= 0) map[r][c] = type;
+  }
+}
+
+// =============================================
+// SECTION 1: ENTRANCE (cols 0-30)
+// =============================================
+
+// Left wall
+fillRect(0, 0, 34, 1, S);
+
+// Ground floor
+fillRect(28, 0, 34, 30, S);
+
+// Ceiling
+fillRect(0, 0, 3, 35, S);
+
+// Entry archway
+fillRect(4, 0, 10, 3, S);
+
+// Player start
+set(27, 5, G);
+set(27, 6, B); // Bonfire 1
+
+// Small step-up platforms in entry
+fillRect(28, 2, 28, 8, S);
+
+// Some decoration ground variation
+fillRect(26, 12, 27, 15, S); // small hill
+
+// Enemy at entrance area
+set(27, 18, N);
+
+// Gems
+set(25, 14, C);
+set(24, 14, C);
+
+// =============================================
+// SECTION 2: COMBAT ZONE 1 (cols 25-55)
+// =============================================
+
+// Continue ground
+fillRect(28, 25, 34, 55, S);
+
+// Ceiling continues
+fillRect(0, 30, 3, 60, S);
+
+// Raised platform section
+fillRect(23, 30, 24, 38, S);
+fillRect(20, 42, 21, 48, S);
+
+// Enemies on platforms
+set(22, 34, N);
+set(19, 45, N);
+
+// Ground enemies
+set(27, 40, N);
+set(27, 50, N);
+
+// Small pit with spikes
+fillRect(28, 46, 28, 48, E);
+fillRect(29, 46, 29, 48, E);
+hline(30, 46, 48, D);
+fillRect(31, 46, 34, 48, S);
+
+// Gems above pit
+set(26, 47, C);
+
+// One-way platforms over pit
+hline(27, 46, 48, P);
+
+// =============================================
+// SECTION 3: PUZZLE A - Pressure Plates + Moving Platforms (cols 55-95)
+// =============================================
+
+// Ground with gaps
+fillRect(28, 55, 34, 65, S);
+// Gap for puzzle
+fillRect(28, 66, 28, 74, E);
+fillRect(29, 66, 29, 74, E);
+fillRect(30, 66, 34, 74, S);
+hline(30, 66, 74, D); // spikes in gap
+
+// Continue ground after gap
+fillRect(28, 75, 34, 95, S);
+
+// Puzzle elements:
+// Pressure plate on left side
+set(27, 60, Z); // pressure plate position
+
+// Moving platform indicators (where platform travels)
+hline(26, 67, 73, Z); // path of moving platform
+
+// Wall with gap that opens
+fillRect(15, 63, 27, 64, S); // wall before puzzle room
+fillRect(22, 63, 23, 64, E); // opening in wall
+
+// Puzzle room ceiling
+fillRect(0, 55, 3, 100, S);
+
+// Second puzzle: pushable box area
+fillRect(24, 78, 25, 80, Z); // pushable box
+set(27, 88, Z); // pressure plate 2
+
+// Elevated reward platform
+fillRect(18, 85, 19, 90, P);
+set(17, 87, C);
+set(17, 88, C);
+
+// =============================================
+// SECTION 4: THE HUB - Visible Upper Platform + Hole Down (cols 90-130)
+// =============================================
+
+// Ground
+fillRect(28, 90, 34, 115, S);
+
+// *** THE VISIBLE UPPER PLATFORM (needs double jump) ***
+fillRect(10, 98, 11, 108, L); // purple = locked/needs ability
+// Arrow indicator
+set(12, 103, L);
+set(13, 103, L);
+
+// Gap/hole leading underground
+fillRect(28, 116, 28, 122, E);
+fillRect(29, 116, 29, 122, E);
+fillRect(30, 116, 30, 122, E);
+fillRect(31, 116, 31, 122, E);
+fillRect(32, 116, 32, 122, E);
+fillRect(33, 116, 33, 122, E);
+fillRect(34, 116, 34, 122, E);
+// Walls around hole
+fillRect(20, 115, 34, 115, S);
+fillRect(20, 123, 34, 123, S);
+
+// Label the hole area - small platforms inside to guide fall
+set(30, 118, P);
+set(32, 120, P);
+
+// Ground continues after hole
+fillRect(28, 124, 34, 135, S);
+
+// Enemies guarding the area
+set(27, 95, N);
+set(27, 110, N);
+
+// Bonfire before the hub
+set(27, 93, B);
+
+// Gems above
+set(22, 100, C);
+set(22, 105, C);
+
+// Underground exit comes up here
+fillRect(28, 132, 28, 134, E);
+fillRect(27, 132, 27, 134, P); // one-way platform to get back up
+// Small marker
+set(26, 133, G); // return point from underground
+
+// =============================================
+// SECTION 5: COMBAT ZONE 2 + PATROL (cols 130-165)
+// =============================================
+
+// Ground
+fillRect(28, 130, 34, 165, S);
+
+// Ceiling
+fillRect(0, 100, 3, 170, S);
+
+// Varied terrain
+fillRect(25, 135, 27, 138, S); // raised section
+fillRect(23, 142, 24, 146, S); // higher platform
+fillRect(20, 150, 21, 155, S); // even higher
+fillRect(25, 158, 27, 162, S); // another raised section
+
+// Enemies patrolling
+set(27, 140, N);
+set(22, 144, N);
+set(19, 152, N);
+set(27, 155, N);
+set(24, 160, N);
+
+// Spike pits
+fillRect(28, 148, 28, 150, E);
+hline(29, 148, 150, D);
+fillRect(30, 148, 34, 150, S);
+
+// One way platform over spikes
+hline(27, 148, 150, P);
+
+// Gems scattered
+set(21, 143, C);
+set(18, 152, C);
+set(23, 159, C);
+
+// =============================================
+// SECTION 6: BONFIRE 4 + APPROACH TO STONE (cols 165-185)
+// =============================================
+
+// Ground
+fillRect(28, 165, 34, 185, S);
+
+// Bonfire
+set(27, 170, B);
+
+// Narrowing passage - walls closing in
+fillRect(0, 165, 8, 200, S); // ceiling gets lower
+fillRect(8, 175, 12, 176, S); // stalactite
+fillRect(8, 180, 11, 181, S); // another stalactite
+
+// Atmospheric enemies
+set(27, 178, N);
+
+// Gems leading to the stone
+set(26, 175, C);
+set(26, 180, C);
+set(26, 185, C);
+
+// =============================================
+// SECTION 7: MYTHICAL STONE + EXIT TO ARC 3 (cols 185-199)
+// =============================================
+
+// Ground
+fillRect(28, 185, 34, 199, S);
+
+// *** THE MYTHICAL STONE (needs fireball) ***
+fillRect(14, 189, 27, 191, L); // tall purple barrier
+
+// Decorative pillars around stone
+fillRect(12, 187, 27, 187, S);
+fillRect(12, 193, 27, 193, S);
+
+// Exit area (behind the stone)
+fillRect(28, 192, 34, 199, S);
+set(27, 196, G); // exit marker to Arc 3
+
+// Right wall
+fillRect(0, 198, 34, 199, S);
+
+// Exit archway
+fillRect(12, 196, 26, 199, S);
+fillRect(15, 196, 26, 197, E); // doorway
+
+// =============================================
+// BOTTOM BORDER
+// =============================================
+// Make sure bottom rows are always solid (except holes)
+for (let c = 0; c < COLS; c++) {
+  if (map[34][c] === E) {
+    // Check if it's intentionally empty (holes)
+    if (c >= 116 && c <= 122) continue; // the underground hole
+    map[34][c] = S;
+  }
+}
+
+// =============================================
+// SECTION LABELS (stored for overlay)
+// =============================================
+const sectionLabels = [
+  { col: 5, row: 6, text: "ENTRANCE", sub: "Start + Bonfire 1" },
+  { col: 35, row: 6, text: "COMBAT ZONE 1", sub: "Novi neprijatelji" },
+  { col: 68, row: 6, text: "PUZZLE A", sub: "Pressure Plates +\nMoving Platforms" },
+  { col: 100, row: 6, text: "HUB", sub: "Platforma gore (locked)\n+ Rupa dole" },
+  { col: 142, row: 6, text: "COMBAT ZONE 2", sub: "Patrol neprijatelji" },
+  { col: 170, row: 6, text: "BONFIRE 4", sub: "Pred kamen" },
+  { col: 190, row: 6, text: "MITSKI KAMEN", sub: "→ Arc 3" },
+];
+
+const annotations = [
+  { col: 103, row: 9, text: "⬆ DOUBLE JUMP\nplatforma (zaključana)", color: "#aa44ff" },
+  { col: 119, row: 18, text: "⬇ RUPA\nu underground", color: "#ff9900" },
+  { col: 190, row: 10, text: "🔥 FIREBALL\npotreban!", color: "#aa44ff" },
+  { col: 133, row: 24, text: "⬆ Izlaz iz\nunderground-a", color: "#22aa22" },
+  { col: 196, row: 20, text: "→ Arc 3", color: "#22aa22" },
+  { col: 5, row: 25, text: "▶ START", color: "#22aa22" },
+];
+
+// =============================================
+// RENDER
+// =============================================
+
+function render() {
+  canvas.width = COLS * TILE;
+  canvas.height = ROWS * TILE;
+
+  // Background
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Grid
+  ctx.strokeStyle = '#e0e0e0';
+  ctx.lineWidth = 0.5;
+  if (TILE >= 5) {
+    for (let r = 0; r <= ROWS; r++) {
+      ctx.beginPath();
+      ctx.moveTo(0, r * TILE);
+      ctx.lineTo(COLS * TILE, r * TILE);
+      ctx.stroke();
+    }
+    for (let c = 0; c <= COLS; c++) {
+      ctx.beginPath();
+      ctx.moveTo(c * TILE, 0);
+      ctx.lineTo(c * TILE, ROWS * TILE);
+      ctx.stroke();
+    }
+  }
+
+  // Tiles
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const t = map[r][c];
+      if (t !== E) {
+        ctx.fillStyle = COLORS[t];
+        ctx.fillRect(c * TILE, r * TILE, TILE, TILE);
+        // Add subtle border for non-solid tiles
+        if (t !== S && t !== W && TILE >= 5) {
+          ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+          ctx.lineWidth = 0.5;
+          ctx.strokeRect(c * TILE, r * TILE, TILE, TILE);
+        }
+      }
+    }
+  }
+
+  // Section dividers
+  ctx.setLineDash([4, 4]);
+  ctx.strokeStyle = '#ccc';
+  ctx.lineWidth = 1;
+  [30, 55, 95, 130, 165, 185].forEach(c => {
+    ctx.beginPath();
+    ctx.moveTo(c * TILE, 0);
+    ctx.lineTo(c * TILE, ROWS * TILE);
+    ctx.stroke();
+  });
+  ctx.setLineDash([]);
+
+  // Section labels
+  if (TILE >= 5) {
+    ctx.textAlign = 'center';
+    sectionLabels.forEach(lbl => {
+      ctx.font = `bold ${Math.max(8, TILE * 1.2)}px 'Segoe UI', sans-serif`;
+      ctx.fillStyle = '#999';
+      ctx.fillText(lbl.text, lbl.col * TILE, lbl.row * TILE);
+      ctx.font = `${Math.max(6, TILE * 0.9)}px 'Segoe UI', sans-serif`;
+      ctx.fillStyle = '#bbb';
+      const lines = lbl.sub.split('\n');
+      lines.forEach((line, i) => {
+        ctx.fillText(line, lbl.col * TILE, (lbl.row + 1.5 + i * 1.2) * TILE);
+      });
+    });
+
+    // Annotations
+    annotations.forEach(a => {
+      ctx.font = `bold ${Math.max(7, TILE * 1)}px 'Segoe UI', sans-serif`;
+      ctx.fillStyle = a.color;
+      ctx.textAlign = 'center';
+      const lines = a.text.split('\n');
+      lines.forEach((line, i) => {
+        ctx.fillText(line, a.col * TILE, (a.row + i * 1.4) * TILE);
+      });
+    });
+  }
+}
+
+function zoomIn() {
+  if (TILE < 20) { TILE += 2; render(); }
+}
+function zoomOut() {
+  if (TILE > 3) { TILE -= 2; render(); }
+}
+function resetZoom() {
+  TILE = 7; render();
+}
+
+render();
+</script>
+
+</body>
+</html>

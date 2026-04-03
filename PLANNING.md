@@ -38,6 +38,45 @@
 
 ---
 
+## Arc_2 — Puzzle Mehanike
+
+> Svaki od 3 sloja u Arc_2 ima jednu puzzle sekciju. Svaki puzzle koristi iste skripte, samo u drugom kontekstu.
+
+### Skripte koje treba napraviti
+
+- [ ] `PressurePlate.cs` — aktivira se kad igrač ili box stane na nju, šalje `UnityEvent`
+- [ ] `MovingPlatform.cs` — kreće se između 2 tačke, može biti vezana za PressurePlate/Switch
+- [ ] `PushableBox.cs` — igrač ga gura levo/desno, reaguje na gravitaciju, aktivira PressurePlate
+- [ ] `TimedSwitch.cs` — aktivira se slash attack-om (`TakeDamage`), ostaje aktivan X sekundi
+- [ ] `TimedGate.cs` — otvara/zatvara se na signal od Switch-a, sa vizuelnim tajmerom
+- [ ] `CrumblingPlatform.cs` — raspada se N sekundi nakon što igrač stane, ne može se resetovati
+
+### Puzzle A — Surface (Ground Level)
+
+**Mehanika:** Pressure Plates + Moving Platforms
+
+- [ ] Igrač stane na pressure plate → platforma se pomeri i otvori put
+- [ ] Napreduje do: plate na jednom mestu, platforma na drugom → moraš brzo da stigneš
+- [ ] Finalni korak: gurni PushableBox na plate da zaključaš platformu u poziciji trajno
+
+### Puzzle B — Underground Tunnels
+
+**Mehanika:** PushableBox u mraku → Pressure Plates
+
+- [ ] 2-3 PushableBox-a raspoređena po tunelu
+- [ ] Igrač ih gura na odgovarajuće pressure plate-ove da otvori put do Boss Arene
+- [ ] Mračnija atmosfera — vizuelno ograničen prostor čini puzzle težim za čitanje
+
+### Puzzle C — Cloud Level (Gornji sloj)
+
+**Mehanika:** Timed Switches + Crumbling Platforms — vertikalni uspon
+
+- [ ] Igrač udari switch mačem → otvori se serija platformi na ograničeno vreme (3-5s)
+- [ ] Crumbling platforms se raspadaju čim igrač krene — nema povratka
+- [ ] Finalni korak: dva switch-a u pravom redosledu + precizno skakanje kroz nestajuće platforme
+
+---
+
 ## Arc_3 — Boss Arena
 - [ ] Level design — boss arena
 - [ ] Boss Dragon fight (breath attack, faze, death)
