@@ -44,9 +44,9 @@
 
 ### Skripte koje treba napraviti
 
-- [ ] `PressurePlate.cs` — aktivira se kad igrač ili box stane na nju, šalje `UnityEvent`
-- [ ] `MovingPlatform.cs` — kreće se između 2 tačke, može biti vezana za PressurePlate/Switch
-- [ ] `PushableBox.cs` — igrač ga gura levo/desno, reaguje na gravitaciju, aktivira PressurePlate
+- [x] `PressurePlate.cs` — aktivira se kad igrač ili box stane na nju, šalje `UnityEvent`
+- [x] `MovingPlatform.cs` — kreće se između 2 tačke, može biti vezana za PressurePlate/Switch
+- [x] `PushableBox.cs` — igrač ga gura levo/desno, reaguje na gravitaciju, aktivira PressurePlate
 - [ ] `TimedSwitch.cs` — aktivira se slash attack-om (`TakeDamage`), ostaje aktivan X sekundi
 - [ ] `TimedGate.cs` — otvara/zatvara se na signal od Switch-a, sa vizuelnim tajmerom
 - [ ] `CrumblingPlatform.cs` — raspada se N sekundi nakon što igrač stane, ne može se resetovati
@@ -55,9 +55,9 @@
 
 **Mehanika:** Pressure Plates + Moving Platforms
 
-- [ ] Igrač stane na pressure plate → platforma se pomeri i otvori put
-- [ ] Napreduje do: plate na jednom mestu, platforma na drugom → moraš brzo da stigneš
-- [ ] Finalni korak: gurni PushableBox na plate da zaključaš platformu u poziciji trajno
+- [x] Igrač stane na pressure plate → platforma se pomeri i otvori put
+- [x] Napreduje do: plate na jednom mestu, platforma na drugom → moraš brzo da stigneš
+- [x] Finalni korak: gurni PushableBox na plate da zaključaš platformu u poziciji trajno
 
 ### Puzzle B — Underground Tunnels
 

@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arc 2 — Ground Layer Tilemap (500 tiles)</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #fff;
+    color: #111;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+  }
+  .header {
+    text-align: center;
+    padding: 20px;
+    border-bottom: 2px solid #111;
+  }
+  .header h1 { font-size: 1.5rem; }
+  .header p  { font-size: 0.85rem; color: #666; margin-top: 4px; }
+
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 14px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid #ccc;
+    background: #fafafa;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    color: #333;
+  }
+  .legend-swatch {
+    width: 18px; height: 18px;
+    border: 1px solid #999;
+  }
+
+  .scroll-wrapper {
+    overflow-x: auto;
+    overflow-y: auto;
+    padding: 20px;
+    max-height: calc(100vh - 150px);
+  }
+
+  canvas { display: block; border: 2px solid #111; }
+
+  .controls {
+    position: fixed;
+    bottom: 20px; right: 20px;
+    display: flex; gap: 8px;
+    z-index: 100;
+  }
+  .controls button {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    border: 2px solid #111;
+    background: #fff;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .controls button:hover { background: #eee; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>ARC 2 — GROUND LAYER · Tilemap Layout</h1>
+  <p>1 tile = 1×1 Unity unit · 500 × 38 tiles · 31 tiles visible per screen</p>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-swatch" style="background:#111"></div> Solid Ground / Wall</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#555"></div> One-Way Platform</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#ee2222"></div> Spikes / Death</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#ff9900"></div> Bonfire Checkpoint</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#22aa22"></div> Player Spawn / Exit</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#4488ff"></div> Puzzle Element</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#aa44ff"></div> Locked (needs ability)</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#ffaa00"></div> Enemy Position</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#00cccc"></div> Collectable / Gem</div>
+</div>
+
+<div class="scroll-wrapper">
+  <canvas id="tilemap"></canvas>
+</div>
+
+<div class="controls">
+  <button onclick="zoomIn()">Zoom +</button>
+  <button onclick="zoomOut()">Zoom −</button>
+  <button onclick="resetZoom()">Reset</button>
+</div>
+
+<script>
+const COLS = 500;
+const ROWS = 38;
+let TILE = 7;
+
+const canvas = document.getElementById('tilemap');
+const ctx    = canvas.getContext('2d');
+
+// Tile types
+const E = 0;   // Empty / air
+const S = 1;   // Solid ground / wall
+const P = 2;   // One-way platform
+const D = 3;   // Danger / spikes
+const B = 4;   // Bonfire
+const G = 5;   // Player spawn / exit
+const Z = 6;   // Puzzle element (blue)
+const L = 7;   // Locked / needs ability (purple)
+const N = 8;   // Enemy position (orange)
+const C = 9;   // Collectable (cyan)
+
+const COLORS = {
+  [E]: '#ffffff',
+  [S]: '#111111',
+  [P]: '#555555',
+  [D]: '#ee2222',
+  [B]: '#ff9900',
+  [G]: '#22aa22',
+  [Z]: '#4488ff',
+  [L]: '#aa44ff',
+  [N]: '#ffaa00',
+  [C]: '#00cccc',
+};
+
+// Build empty map
+const map = [];
+for (let r = 0; r < ROWS; r++) map[r] = new Array(COLS).fill(E);
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function fillRect(r1, c1, r2, c2, t) {
+  for (let r = r1; r <= r2 && r < ROWS; r++)
+    for (let c = c1; c <= c2 && c < COLS; c++)
+      if (r >= 0 && c >= 0) map[r][c] = t;
+}
+function hline(r, c1, c2, t) {
+  for (let c = c1; c <= c2 && c < COLS; c++)
+    if (r >= 0 && r < ROWS && c >= 0) map[r][c] = t;
+}
+function vline(c, r1, r2, t) {
+  for (let r = r1; r <= r2 && r < ROWS; r++)
+    if (r >= 0 && c >= 0 && c < COLS) map[r][c] = t;
+}
+function set(r, c, t) {
+  if (r >= 0 && r < ROWS && c >= 0 && c < COLS) map[r][c] = t;
+}
+
+// Ground floor sits at row 30, ceiling at row 0-4
+// Player height ~3 tiles, comfortable room height ~18 tiles
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SECTION 1 — ENTRANCE  (cols 0–49)
+// ══════════════════════════════════════════════════════════════════════════════
+
+// Left boundary wall
+vline(0, 0, ROWS - 1, S);
+
+// Ceiling
+fillRect(0, 0, 3, 80, S);
+
+// Main floor
+fillRect(30, 0, ROWS - 1, 55, S);
+
+// Left entry arch
+fillRect(4, 0, 12, 3, S);
+
+// Player spawn
+set(29, 6, G);
+set(29, 8, B);  // Bonfire 1
+
+// Gentle hill near start — gives sense of terrain
+fillRect(28, 14, 29, 20, S);
+fillRect(27, 22, 28, 26, S);
+
+// First enemy — easy, near spawn
+set(29, 30, N);
+
+// Gems leading right
+set(26, 16, C);
+set(25, 23, C);
+set(27, 35, C);
+
+// Low platform — first platforming moment
+hline(25, 38, 46, P);
+set(24, 42, C);
+set(23, 42, C);
+
+// Enemy on platform
+set(24, 44, N);
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SECTION 2 — COMBAT ZONE 1  (cols 50–149)
+// ══════════════════════════════════════════════════════════════════════════════
+
+// Floor continues
+fillRect(30, 50, ROWS - 1, 149, S);
+
+// Ceiling continues
+fillRect(0, 80, 3, 160, S);
+
+// --- Terrain variety ---
+
+// First spike pit — teaches danger
+fillRect(30, 58, 30, 64, E);
+hline(31, 58, 64, D);
+fillRect(32, 58, ROWS - 1, 64, S);
+hline(29, 58, 64, P);  // one-way platform to cross safely
+set(27, 61, C);
+
+// Raised terrain section 1
+fillRect(27, 68, 29, 78, S);
+set(26, 72, N);
+set(26, 76, N);
+
+// Drop back to floor
+fillRect(30, 79, ROWS - 1, 90, S);
+
+// Mid-air platforms — vertical combat area
+hline(23, 85, 93, P);
+hline(19, 96, 106, P);
+set(22, 89, N);
+set(18, 100, N);
+set(18, 104, N);
+set(21, 88, C);
+set(17, 101, C);
+
+// Ground enemies in this stretch
+set(29, 82, N);
+set(29, 95, N);
+
+// Second spike pit — wider, harder
+fillRect(30, 110, 30, 120, E);
+hline(31, 110, 120, D);
+fillRect(32, 110, ROWS - 1, 120, S);
+// Two stepping platforms over this pit
+hline(26, 111, 114, P);
+hline(26, 117, 120, P);
+set(24, 112, C);
+set(24, 119, C);
+
+// Raised section 2 — mini arena before puzzle
+fillRect(27, 124, 29, 138, S);
+set(26, 127, N);
+set(26, 131, N);
+set(26, 135, N);
+set(25, 129, C);
+set(25, 133, C);
+
+// Drop to floor
+fillRect(30, 139, ROWS - 1, 149, S);
+set(29, 145, N);
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SECTION 3 — PUZZLE A  (cols 150–249)
+// Pressure Plates + Moving Platform + PushableBox
+// ══════════════════════════════════════════════════════════════════════════════
+
+// Floor
+fillRect(30, 150, ROWS - 1, 180, S);
+fillRect(30, 200, ROWS - 1, 249, S);
+
+// Ceiling
+fillRect(0, 160, 3, 260, S);
+
+// --- GAP with spikes — the obstacle the platform bridges ---
+fillRect(30, 181, 30, 199, E);
+hline(31, 181, 199, D);
+fillRect(32, 181, ROWS - 1, 199, S);
+
+// Puzzle room walls — corridor feel
+vline(155, 10, 29, S);
+vline(245, 10, 29, S);
+
+// --- Pressure Plate 1 — player activated (requiresBox = false) ---
+// Player stands here, platform moves into place
+set(29, 163, Z);  // pressure plate tile
+set(29, 164, Z);
+// Label zone
+set(25, 163, C);  // reward gem above plate area
+
+// Moving platform resting position (left side of gap)
+hline(26, 178, 182, Z);  // platform shown in puzzle color
+
+// --- Wall with passage on left side of gap ---
+fillRect(15, 175, 29, 176, S);
+fillRect(20, 175, 22, 176, E);  // opening in wall
+
+// --- PushableBox area ---
+// Box sits here, player pushes it right onto plate 2
+set(27, 210, Z);  // pushable box
+set(27, 211, Z);
+
+// Pressure Plate 2 — box activated (requiresBox = true)
+// This permanently locks the platform in place
+set(29, 232, Z);
+set(29, 233, Z);
+
+// Elevated reward platform — only reachable after puzzle solved
+hline(20, 220, 232, P);
+set(18, 224, C);
+set(18, 226, C);
+set(18, 228, C);
+
+// Enemy guarding puzzle entrance
+set(29, 158, N);
+set(29, 240, N);
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SECTION 4 — THE HUB  (cols 250–329)
+// Visible locked upper platform + hole down to Underground
+// ══════════════════════════════════════════════════════════════════════════════
+
+// Floor — with gap for underground hole
+fillRect(30, 250, ROWS - 1, 279, S);
+// The underground hole
+fillRect(30, 280, ROWS - 1, 299, E);
+// Walls around hole
+vline(279, 15, ROWS - 1, S);
+vline(300, 15, ROWS - 1, S);
+// Guide platforms inside hole shaft
+set(33, 283, P);
+set(35, 291, P);
+set(37, 286, P);
+
+// Floor continues after hole
+fillRect(30, 300, ROWS - 1, 329, S);
+
+// Ceiling
+fillRect(0, 250, 3, 340, S);
+
+// *** LOCKED UPPER PLATFORM — needs Double Jump ***
+fillRect(12, 258, 13, 278, L);  // purple — locked
+// Arrow indicators pointing up
+set(14, 265, L);
+set(15, 265, L);
+set(14, 270, L);
+set(15, 270, L);
+
+// Bonfire 2 — before the hub (last safe point before hole)
+set(29, 254, B);
+
+// Enemies patrolling the hub
+set(29, 262, N);
+set(29, 315, N);
+
+// Gems
+set(22, 258, C);
+set(22, 268, C);
+set(22, 278, C);
+
+// Underground exit return point
+hline(29, 304, 308, P);  // one-way platform to climb back up
+set(28, 306, G);          // return marker from underground
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SECTION 5 — COMBAT ZONE 2  (cols 330–429)
+// ══════════════════════════════════════════════════════════════════════════════
+
+// Floor
+fillRect(30, 330, ROWS - 1, 429, S);
+
+// Ceiling
+fillRect(0, 340, 3, 440, S);
+
+// --- Varied terrain ---
+
+// Raised section 1
+fillRect(27, 335, 29, 348, S);
+set(26, 339, N);
+set(26, 345, N);
+
+// Back to floor
+fillRect(30, 349, ROWS - 1, 355, S);
+
+// Spike pit 3
+fillRect(30, 356, 30, 364, E);
+hline(31, 356, 364, D);
+fillRect(32, 356, ROWS - 1, 364, S);
+hline(27, 357, 363, P);
+set(25, 360, C);
+
+// Tall platforms — vertical traversal challenge
+hline(24, 368, 376, P);
+hline(19, 379, 389, P);
+hline(24, 392, 400, P);
+set(23, 372, N);
+set(18, 383, N);
+set(18, 387, N);
+set(23, 396, N);
+set(22, 371, C);
+set(17, 384, C);
+set(22, 395, C);
+
+// Ground level enemies
+set(29, 350, N);
+set(29, 365, N);
+set(29, 405, N);
+set(29, 418, N);
+
+// Spike pit 4 — near end of combat zone
+fillRect(30, 408, 30, 416, E);
+hline(31, 408, 416, D);
+fillRect(32, 408, ROWS - 1, 416, S);
+hline(27, 409, 415, P);
+set(25, 412, C);
+
+// Raised section 2 — approaching Bonfire 4
+fillRect(27, 420, 29, 429, S);
+set(26, 424, N);
+set(25, 426, C);
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SECTION 6 — BONFIRE 4 + APPROACH  (cols 430–469)
+// ══════════════════════════════════════════════════════════════════════════════
+
+// Floor
+fillRect(30, 430, ROWS - 1, 469, S);
+
+// Ceiling gets lower — dramatic narrowing
+fillRect(0, 440, 8, 500, S);
+
+// Bonfire 4
+set(29, 434, B);
+
+// Stalactites for atmosphere
+fillRect(9, 444, 14, 445, S);
+fillRect(9, 452, 13, 453, S);
+fillRect(9, 460, 15, 461, S);
+
+// Last enemies before the stone
+set(29, 440, N);
+set(29, 450, N);
+set(29, 462, N);
+
+// Gems leading toward the stone
+set(28, 436, C);
+set(28, 443, C);
+set(28, 453, C);
+set(28, 463, C);
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SECTION 7 — MYTHIC STONE + EXIT TO ARC 3  (cols 470–499)
+// ══════════════════════════════════════════════════════════════════════════════
+
+// Floor
+fillRect(30, 470, ROWS - 1, 499, S);
+
+// Decorative pillars framing the stone
+vline(472, 10, 29, S);
+vline(480, 10, 29, S);
+vline(488, 10, 29, S);
+
+// *** MYTHIC STONE — needs Fireball ***
+fillRect(10, 481, 29, 484, L);  // tall purple barrier
+
+// Small alcove gems — reward for getting here
+set(28, 474, C);
+set(28, 476, C);
+
+// Exit marker — behind the stone, leads to Arc 3
+set(29, 493, G);
+
+// Exit arch
+fillRect(10, 490, 29, 499, S);
+fillRect(14, 490, 29, 491, E);  // doorway opening
+
+// Right boundary wall
+vline(499, 0, ROWS - 1, S);
+
+// ── Bottom border enforcement ────────────────────────────────────────────────
+for (let c = 0; c < COLS; c++) {
+  if (map[ROWS - 1][c] === E) {
+    // Keep underground shaft open
+    if (c >= 280 && c <= 299) continue;
+    map[ROWS - 1][c] = S;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// LABELS & ANNOTATIONS
+// ══════════════════════════════════════════════════════════════════════════════
+
+const sectionLabels = [
+  { col:  18, row: 6,  text: "ENTRANCE",        sub: "Spawn + Bonfire 1" },
+  { col:  95, row: 6,  text: "COMBAT ZONE 1",   sub: "Snake · Lizard · Opossum" },
+  { col: 195, row: 6,  text: "PUZZLE A",         sub: "Pressure Plates +\nMoving Platform + Box" },
+  { col: 285, row: 6,  text: "THE HUB",          sub: "Locked platform above\n+ Hole to Underground" },
+  { col: 375, row: 6,  text: "COMBAT ZONE 2",   sub: "Patrol enemies\nVertical traversal" },
+  { col: 447, row: 10, text: "BONFIRE 4",        sub: "Pred Mitskim\nKamenom" },
+  { col: 484, row: 6,  text: "MYTHIC STONE",     sub: "→ Arc 3" },
+];
+
+const annotations = [
+  { col: 163, row: 22, text: "① Plate 1\n(player steps)",   color: "#4488ff" },
+  { col: 210, row: 24, text: "② PushableBox",               color: "#4488ff" },
+  { col: 232, row: 22, text: "③ Plate 2\n(box locks it)",   color: "#4488ff" },
+  { col: 265, row: 10, text: "⬆ DOUBLE JUMP\nplatform (locked)", color: "#aa44ff" },
+  { col: 289, row: 20, text: "⬇ HOLE\nto Underground",      color: "#ff9900" },
+  { col: 306, row: 26, text: "⬆ Return\nfrom Underground",  color: "#22aa22" },
+  { col: 482, row: 18, text: "🔥 FIREBALL\nneeded!",        color: "#aa44ff" },
+  { col: 493, row: 27, text: "→ Arc 3",                     color: "#22aa22" },
+  { col:   6, row: 26, text: "▶ START",                     color: "#22aa22" },
+];
+
+// ══════════════════════════════════════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════════════════════════════════════
+
+const SECTION_DIVIDERS = [50, 150, 250, 330, 430, 470];
+
+function render() {
+  canvas.width  = COLS * TILE;
+  canvas.height = ROWS * TILE;
+
+  // Background
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Grid lines
+  if (TILE >= 5) {
+    ctx.strokeStyle = '#e0e0e0';
+    ctx.lineWidth = 0.5;
+    for (let r = 0; r <= ROWS; r++) {
+      ctx.beginPath();
+      ctx.moveTo(0, r * TILE);
+      ctx.lineTo(COLS * TILE, r * TILE);
+      ctx.stroke();
+    }
+    for (let c = 0; c <= COLS; c++) {
+      ctx.beginPath();
+      ctx.moveTo(c * TILE, 0);
+      ctx.lineTo(c * TILE, ROWS * TILE);
+      ctx.stroke();
+    }
+  }
+
+  // Tiles
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const t = map[r][c];
+      if (t === E) continue;
+      ctx.fillStyle = COLORS[t];
+      ctx.fillRect(c * TILE, r * TILE, TILE, TILE);
+      if (t !== S && TILE >= 5) {
+        ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+        ctx.lineWidth = 0.5;
+        ctx.strokeRect(c * TILE, r * TILE, TILE, TILE);
+      }
+    }
+  }
+
+  // Section dividers
+  ctx.setLineDash([4, 4]);
+  ctx.strokeStyle = '#bbb';
+  ctx.lineWidth = 1;
+  SECTION_DIVIDERS.forEach(c => {
+    ctx.beginPath();
+    ctx.moveTo(c * TILE, 0);
+    ctx.lineTo(c * TILE, ROWS * TILE);
+    ctx.stroke();
+  });
+  ctx.setLineDash([]);
+
+  if (TILE >= 5) {
+    // Section labels
+    ctx.textAlign = 'center';
+    sectionLabels.forEach(lbl => {
+      ctx.font = `bold ${Math.max(8, TILE * 1.2)}px 'Segoe UI', sans-serif`;
+      ctx.fillStyle = '#999';
+      ctx.fillText(lbl.text, lbl.col * TILE, lbl.row * TILE);
+      ctx.font = `${Math.max(6, TILE * 0.85)}px 'Segoe UI', sans-serif`;
+      ctx.fillStyle = '#bbb';
+      lbl.sub.split('\n').forEach((line, i) => {
+        ctx.fillText(line, lbl.col * TILE, (lbl.row + 1.5 + i * 1.3) * TILE);
+      });
+    });
+
+    // Annotations
+    annotations.forEach(a => {
+      ctx.font = `bold ${Math.max(7, TILE * 0.95)}px 'Segoe UI', sans-serif`;
+      ctx.fillStyle = a.color;
+      ctx.textAlign = 'center';
+      a.text.split('\n').forEach((line, i) => {
+        ctx.fillText(line, a.col * TILE, (a.row + i * 1.4) * TILE);
+      });
+    });
+  }
+}
+
+function zoomIn()    { if (TILE < 20) { TILE += 2; render(); } }
+function zoomOut()   { if (TILE > 3)  { TILE -= 2; render(); } }
+function resetZoom() { TILE = 7; render(); }
+
+render();
+</script>
+</body>
+</html>
