@@ -33,7 +33,6 @@ public class MovingPlatform : MonoBehaviour
     private Rigidbody2D rb;
     private bool isActive = false;
     private bool movingToB = true;
-    private Vector2 previousPosition;
 
     private Vector2 worldPointA;
     private Vector2 worldPointB;
@@ -60,23 +59,10 @@ public class MovingPlatform : MonoBehaviour
         worldPointA = (Vector2)transform.position + offsetA;
         worldPointB = (Vector2)transform.position + offsetB;
 
-        previousPosition = rb.position;
         UpdateVisual();
 
         if (startActive)
             Activate();
-    }
-
-    // ── FixedUpdate ───────────────────────────────────────────────────────────
-
-    private void FixedUpdate()
-    {
-        if (!isActive) return;
-
-        Vector2 delta = rb.position - previousPosition;
-        previousPosition = rb.position;
-
-        CarryRiders(delta);
     }
 
     // ── Public API ────────────────────────────────────────────────────────────
@@ -113,13 +99,13 @@ public class MovingPlatform : MonoBehaviour
                     speed * Time.fixedDeltaTime
                 );
 
-                previousPosition = rb.position;
+                CarryRiders(newPos - rb.position);
                 rb.MovePosition(newPos);
 
                 yield return new WaitForFixedUpdate();
             }
 
-            previousPosition = rb.position;
+            CarryRiders(target - rb.position);
             rb.MovePosition(target);
 
             if (movingToB) onReachedPointB?.Invoke();

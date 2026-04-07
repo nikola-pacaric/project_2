@@ -103,6 +103,7 @@ public class PlayerController : MonoBehaviour
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
             anim.SetTrigger("jumpUp");
             coyoteTimeCounter = 0f;
+            jumpPressed = false;
         }
 
         float animSpeed = Mathf.Abs(rb.linearVelocity.x);
