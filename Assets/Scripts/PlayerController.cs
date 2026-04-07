@@ -22,12 +22,18 @@ public class PlayerController : MonoBehaviour
     public Transform groundCheck;
     public float groundRadius = 0.2f;
     public LayerMask groundLayer;
+    [Header("Pushable Box")]
+    [SerializeField] private float boxPushSpeed = 3f;
+    [SerializeField] private float boxPushCastDistance = 0.12f;
+    [SerializeField] private float minPushInput = 0.1f;
     public bool isGrounded;
     private bool wasGrounded;
     private float lockMovementTimer;
 
     private Animator anim;
+    private Collider2D col;
     public float velocity;
+    public float MoveInputX => moveInput.x;
 
     private void Awake()
     {
@@ -47,6 +53,7 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
+        col = GetComponent<Collider2D>();
     }
 
     
@@ -125,6 +132,7 @@ public class PlayerController : MonoBehaviour
             };
 
             var results = rb.Slide(desiredVelocity, Time.fixedDeltaTime, slideMovement);
+            
 
             // Animator uses the actual applied velocity
             anim.SetFloat("Speed", Mathf.Abs(results.remainingVelocity.x));
@@ -136,6 +144,39 @@ public class PlayerController : MonoBehaviour
             rb.linearVelocity = desiredVelocity;
             anim.SetFloat("Speed", Mathf.Abs(rb.linearVelocity.x));
             anim.SetBool("isGrounded", false);
+        }
+
+        PushBox();
+    }
+
+    private void PushBox()
+    {
+        if (!isGrounded) return;
+        if (col == null) return;
+
+        float inputX = moveInput.x;
+        if (Mathf.Abs(inputX) < minPushInput) return;
+
+        float dir = Mathf.Sign(inputX);
+        Bounds b = col.bounds;
+        RaycastHit2D[] hits = Physics2D.BoxCastAll(
+            b.center,
+            b.size * 0.95f,
+            0f,
+            new Vector2(dir, 0f),
+            boxPushCastDistance
+        );
+
+        foreach (RaycastHit2D hit in hits)
+        {
+            if (hit.collider == null || hit.collider == col) continue;
+            if (!hit.collider.CompareTag("PushableBox")) continue;
+
+            Rigidbody2D boxRb = hit.rigidbody ?? hit.collider.attachedRigidbody;
+            if (boxRb == null) continue;
+
+            boxRb.linearVelocity = new Vector2(dir * boxPushSpeed, boxRb.linearVelocity.y);
+            return;
         }
     }
 

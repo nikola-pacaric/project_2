@@ -1,17 +1,9 @@
 using UnityEngine;
 
-public class PushableBox : MonoBehaviour
+public class PushableBoxTest : MonoBehaviour
 {
-    [SerializeField] private float pushSpeed = 3.0f;
-    [SerializeField] private float drag = 8f;
-
-    [SerializeField] private Transform groundCheck;
-    [SerializeField] private float groundCheckRadius = 0.1f;
-    [SerializeField] private LayerMask groundLayer;
-
-    [SerializeField] private SpriteRenderer boxSprite;
-    [SerializeField] private Color normalColor = Color.white;
-    [SerializeField] private Color pushedColor = new Color(1.0f, 0.85f, 0.5f);
+    [SerializeField] private float pushSpeed = 3f;
+    [SerializeField] private float minInputToPush = 0.1f;
 
     private Rigidbody2D rb;
 
@@ -19,41 +11,28 @@ public class PushableBox : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         rb.freezeRotation = true;
-        rb.linearDamping = drag;
+        rb.linearDamping = 0f;
         rb.sleepMode = RigidbodySleepMode2D.NeverSleep;
-
-        if (boxSprite == null) boxSprite = GetComponent<SpriteRenderer>();
     }
 
     private void OnCollisionStay2D(Collision2D collision)
     {
         if (!collision.gameObject.CompareTag("Player")) return;
-        PlayerController pc = collision.gameObject.GetComponent<PlayerController>();
 
+        PlayerController pc = collision.gameObject.GetComponent<PlayerController>();
         if (pc == null || !pc.isGrounded) return;
         if (!TryGetPushDirection(collision, out float pushDir)) return;
 
         float inputX = pc.MoveInputX;
-        if (Mathf.Abs(inputX) < 0.1f) return;
+        if (Mathf.Abs(inputX) < minInputToPush) return;
         if (Mathf.Sign(inputX) != Mathf.Sign(pushDir)) return;
 
         rb.linearVelocity = new Vector2(pushDir * pushSpeed, rb.linearVelocity.y);
-
-        UpdateVisual(true);
     }
 
     private void OnCollisionExit2D(Collision2D collision)
     {
         if (!collision.gameObject.CompareTag("Player")) return;
-        UpdateVisual(false);
-    }
-
-    private void UpdateVisual(bool pushed)
-    {
-        if (boxSprite != null)
-        {
-            boxSprite.color = pushed ? pushedColor : normalColor;
-        }
     }
 
     private bool TryGetPushDirection(Collision2D collision, out float pushDir)
@@ -77,12 +56,5 @@ public class PushableBox : MonoBehaviour
 
         pushDir = Mathf.Sign(horizontalOffset);
         return true;
-    }
-
-    private void OnDrawGizmos()
-    {
-        if (groundCheck == null) return ;
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
     }
 }
