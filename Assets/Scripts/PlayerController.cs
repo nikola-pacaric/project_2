@@ -17,6 +17,7 @@ public class PlayerController : MonoBehaviour
     private PlayerControls controls;
     private Vector2 moveInput;
     private bool jumpPressed;
+    private bool jumpConsumed;
     private bool isStomping;
 
     public Transform groundCheck;
@@ -43,7 +44,7 @@ public class PlayerController : MonoBehaviour
         controls.Player.Move.canceled += ctx => moveInput = Vector2.zero;
 
         controls.Player.Jump.performed += ctx => jumpPressed = true;
-        controls.Player.Jump.canceled += ctx => jumpPressed = false;
+        controls.Player.Jump.canceled += ctx => { jumpPressed = false; jumpConsumed = false; };
     }
 
     private void OnEnable() => controls.Player.Enable();
@@ -98,12 +99,12 @@ public class PlayerController : MonoBehaviour
         float newX = Mathf.MoveTowards(rb.linearVelocity.x, targetSpeed, accel * Time.deltaTime);
         rb.linearVelocity = new Vector2(newX, rb.linearVelocity.y);
 
-        if (jumpPressed && coyoteTimeCounter > 0f)
+        if (jumpPressed && !jumpConsumed && coyoteTimeCounter > 0f)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
             anim.SetTrigger("jumpUp");
             coyoteTimeCounter = 0f;
-            jumpPressed = false;
+            jumpConsumed = true;
         }
 
         float animSpeed = Mathf.Abs(rb.linearVelocity.x);

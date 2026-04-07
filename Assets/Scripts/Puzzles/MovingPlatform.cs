@@ -33,6 +33,7 @@ public class MovingPlatform : MonoBehaviour
     private Rigidbody2D rb;
     private bool isActive = false;
     private bool movingToB = true;
+    private float waitTimer = 0f;
 
     private Vector2 worldPointA;
     private Vector2 worldPointB;
@@ -72,52 +73,50 @@ public class MovingPlatform : MonoBehaviour
         if (isActive) return;
         isActive = true;
         UpdateVisual();
-        StartCoroutine(MoveRoutine());
     }
 
     public void Deactivate()
     {
         if (!isActive) return;
         isActive = false;
-        StopAllCoroutines();
         UpdateVisual();
     }
 
-    // ── Private Methods ───────────────────────────────────────────────────────
+    // ── FixedUpdate ───────────────────────────────────────────────────────────
 
-    private IEnumerator MoveRoutine()
+    private void FixedUpdate()
     {
-        while (isActive)
+        if (!isActive) return;
+
+        if (waitTimer > 0f)
         {
-            Vector2 target = movingToB ? worldPointB : worldPointA;
+            waitTimer -= Time.fixedDeltaTime;
+            return;
+        }
 
-            while (isActive && Vector2.Distance(rb.position, target) > 0.02f)
-            {
-                Vector2 newPos = Vector2.MoveTowards(
-                    rb.position,
-                    target,
-                    speed * Time.fixedDeltaTime
-                );
+        Vector2 target = movingToB ? worldPointB : worldPointA;
 
-                CarryRiders(newPos - rb.position);
-                rb.MovePosition(newPos);
-
-                yield return new WaitForFixedUpdate();
-            }
-
+        if (Vector2.Distance(rb.position, target) <= 0.02f)
+        {
             CarryRiders(target - rb.position);
             rb.MovePosition(target);
 
             if (movingToB) onReachedPointB?.Invoke();
             else onReachedPointA?.Invoke();
 
-            yield return new WaitForSeconds(waitTime);
-
-            if (!looping) break;
+            if (!looping) { Deactivate(); return; }
 
             movingToB = !movingToB;
+            waitTimer = waitTime;
+            return;
         }
+
+        Vector2 newPos = Vector2.MoveTowards(rb.position, target, speed * Time.fixedDeltaTime);
+        CarryRiders(newPos - rb.position);
+        rb.MovePosition(newPos);
     }
+
+    // ── Private Methods ───────────────────────────────────────────────────────
 
     private void CarryRiders(Vector2 delta)
     {
