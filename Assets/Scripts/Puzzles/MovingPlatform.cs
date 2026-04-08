@@ -43,6 +43,7 @@ public class MovingPlatform : MonoBehaviour
     // ── Properties ────────────────────────────────────────────────────────────
 
     public bool IsActive => isActive;
+    public Vector2 Velocity { get; private set; }
 
     // ── Awake / Start ─────────────────────────────────────────────────────────
 
@@ -86,6 +87,8 @@ public class MovingPlatform : MonoBehaviour
 
     private void FixedUpdate()
     {
+        Velocity = Vector2.zero;
+
         if (!isActive) return;
 
         if (waitTimer > 0f)
@@ -112,7 +115,9 @@ public class MovingPlatform : MonoBehaviour
         }
 
         Vector2 newPos = Vector2.MoveTowards(rb.position, target, speed * Time.fixedDeltaTime);
-        CarryRiders(newPos - rb.position);
+        Vector2 delta = newPos - rb.position;
+        Velocity = delta / Time.fixedDeltaTime;
+        CarryRiders(delta);
         rb.MovePosition(newPos);
     }
 
@@ -137,7 +142,14 @@ public class MovingPlatform : MonoBehaviour
             Rigidbody2D riderRb = rider.attachedRigidbody;
             if (riderRb == null || riderRb == rb) continue;
 
-            riderRb.position += delta;
+            // Player tracks platform velocity itself — only teleport upward Y so gravity doesn't
+            // separate them on ascending platforms. Non-player riders (boxes) get full teleport.
+            bool isPlayer = rider.gameObject.GetComponent<PlayerController>() != null;
+            float xCarry = isPlayer ? 0f : delta.x;
+            float yCarry = delta.y > 0f ? delta.y : 0f;
+
+            if (xCarry != 0f || yCarry != 0f)
+                riderRb.position += new Vector2(xCarry, yCarry);
         }
     }
 

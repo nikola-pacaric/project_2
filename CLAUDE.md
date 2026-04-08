@@ -46,7 +46,7 @@ public int Health { get; private set; }
 | SerializeField | camelCase | `[SerializeField] private float jumpForce` |
 
 ### General Rules
-- Use `[Header("Section Name")]` and `[Tooltip("description")]` to keep the Inspector readable.
+- Use `[Header("Section Name")]` to keep the Inspector readable.
 - Cache component references in `Awake()`, not in `Update()`.
 - Prefer **events and delegates** (`System.Action`, `UnityEvent`) over direct cross-script method calls where appropriate — keeps coupling low.
 - Use **coroutines** for time-based sequences (cooldowns, flash effects, spawn delays).
