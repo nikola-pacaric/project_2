@@ -39,6 +39,7 @@ public class PlayerController : MonoBehaviour
     private float originalGravityScale;
     private bool wasAirborneWhileClimbing;
     private float climbCooldown;
+    private bool exitedClimbAtBottom;
 
     // Components
     private Rigidbody2D rb;
@@ -107,7 +108,11 @@ public class PlayerController : MonoBehaviour
         // ── Climbing ──────────────────────────────────────────────────────────
         climbCooldown -= Time.deltaTime;
 
-        if (isOnLadder && !isClimbing && climbCooldown <= 0f && Mathf.Abs(moveInput.y) > 0.1f)
+        // Reset bottom-exit block when player presses up or leaves the ladder
+        if (exitedClimbAtBottom && (!isOnLadder || moveInput.y > 0.1f))
+            exitedClimbAtBottom = false;
+
+        if (isOnLadder && !isClimbing && climbCooldown <= 0f && Mathf.Abs(moveInput.y) > 0.1f && !exitedClimbAtBottom)
             EnterClimb();
 
         if (isClimbing)
@@ -122,6 +127,7 @@ public class PlayerController : MonoBehaviour
             else if (isGrounded && moveInput.y < 0.1f && wasAirborneWhileClimbing)
             {
                 // Reached bottom of stairs — return to normal movement
+                exitedClimbAtBottom = true;
                 ExitClimb();
             }
             else
