@@ -37,6 +37,8 @@ public class PlayerController : MonoBehaviour
     private bool isOnLadder;
     private bool isClimbing;
     private float originalGravityScale;
+    private bool wasAirborneWhileClimbing;
+    private float climbCooldown;
 
     // Components
     private Rigidbody2D rb;
@@ -103,20 +105,28 @@ public class PlayerController : MonoBehaviour
             coyoteTimeCounter -= Time.deltaTime;
 
         // ── Climbing ──────────────────────────────────────────────────────────
-        if (isOnLadder && !isClimbing && Mathf.Abs(moveInput.y) > 0.1f)
+        climbCooldown -= Time.deltaTime;
+
+        if (isOnLadder && !isClimbing && climbCooldown <= 0f && Mathf.Abs(moveInput.y) > 0.1f)
             EnterClimb();
-        else if (isOnLadder && !isClimbing)
-            Debug.Log($"[PlayerController] On ladder, waiting for input — moveInput.y = {moveInput.y:F2}");
 
         if (isClimbing)
         {
+            if (!isGrounded)
+                wasAirborneWhileClimbing = true;
+
             if (!isOnLadder)
             {
                 ExitClimb();
             }
+            else if (isGrounded && moveInput.y < 0.1f && wasAirborneWhileClimbing)
+            {
+                // Reached bottom of stairs — return to normal movement
+                ExitClimb();
+            }
             else
             {
-                rb.linearVelocity = new Vector2(0f, moveInput.y * climbSpeed);
+                rb.linearVelocity = new Vector2(moveInput.x * moveSpeed, moveInput.y * climbSpeed);
 
                 // Jump off stairs
                 if (jumpPressed && !jumpConsumed)
@@ -135,7 +145,9 @@ public class PlayerController : MonoBehaviour
         {
             anim.SetBool("isClimbing", true);
             anim.SetFloat("Speed", Mathf.Abs(moveInput.y));
+            anim.SetFloat("verticalVelocity", rb.linearVelocity.y);
             anim.SetBool("isGrounded", false);
+            anim.speed = Mathf.Abs(moveInput.y) > 0.1f ? 1f : 0f;
             velocity = rb.linearVelocity.y;
             return;
         }
@@ -206,12 +218,18 @@ public class PlayerController : MonoBehaviour
         isClimbing = true;
         rb.gravityScale = 0f;
         rb.linearVelocity = Vector2.zero;
+        col.isTrigger = true;
+        wasAirborneWhileClimbing = false;
     }
 
     private void ExitClimb()
     {
         isClimbing = false;
         rb.gravityScale = originalGravityScale;
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
+        anim.speed = 1f;
+        col.isTrigger = false;
+        climbCooldown = 0.25f;
     }
 
     // ── Trigger detection ─────────────────────────────────────────────────────
