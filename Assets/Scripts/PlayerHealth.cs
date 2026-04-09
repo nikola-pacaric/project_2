@@ -12,8 +12,12 @@ public class PlayerHealth : MonoBehaviour
     public Vector2 respawnPoint;
 
     [Header("Damage Effects")]
+    [SerializeField] private float invincibilityDuration = 0.8f;
+    [SerializeField] private float spikeBounceForce = 9f;
+    [SerializeField] private float spikeHorizontalForce = 5f;
     private SpriteRenderer sprite;
     private Color originalColor;
+    private bool isInvincible;
 
 
     void Start()
@@ -69,6 +73,8 @@ public class PlayerHealth : MonoBehaviour
 
     public void TakeEnemyDamage(int segmentsLost)
     {
+        if (isInvincible) return;
+
         currentSegment -= segmentsLost;
         currentSegment = Mathf.Max(currentSegment, 0);
 
@@ -78,6 +84,27 @@ public class PlayerHealth : MonoBehaviour
         anim.SetTrigger("isHurt");
 
         ApplyKnockback();
+        StartCoroutine(InvincibilityCoroutine());
+
+        if (currentSegment <= 0)
+        {
+            GameOver();
+        }
+    }
+
+    public void TakeSpikeDamage(int segmentsLost)
+    {
+        if (isInvincible) return;
+
+        currentSegment -= segmentsLost;
+        currentSegment = Mathf.Max(currentSegment, 0);
+
+        StartCoroutine(FlashRed());
+
+        GetComponent<Animator>().SetTrigger("isHurt");
+
+        ApplySpikeKnockback();
+        StartCoroutine(InvincibilityCoroutine());
 
         if (currentSegment <= 0)
         {
@@ -94,14 +121,32 @@ public class PlayerHealth : MonoBehaviour
 
     void ApplyKnockback()
     {
-        GetComponent<PlayerController>().LockMovement(0.3f); // Lock movement for 0.3 seconds
+        GetComponent<PlayerController>().LockMovement(0.3f);
 
         Rigidbody2D rb = GetComponent<Rigidbody2D>();
-        float dir = transform.localScale.x > 0 ? -1 : 1; // Knockback in opposite direction of facing
+        float dir = transform.localScale.x > 0 ? -1 : 1;
 
-        rb.linearVelocity = Vector2.zero; // Reset current velocity
-        rb.linearVelocity = new Vector2(dir * 9f, 9f); // Adjust knockback strength as needed
+        rb.linearVelocity = Vector2.zero;
+        rb.linearVelocity = new Vector2(dir * 9f, 9f);
+    }
 
+    void ApplySpikeKnockback()
+    {
+        PlayerController pc = GetComponent<PlayerController>();
+        pc.LockMovement(0.3f);
+
+        Rigidbody2D rb = GetComponent<Rigidbody2D>();
+        float horizontalInput = pc.MoveInputX;
+
+        rb.linearVelocity = Vector2.zero;
+        rb.linearVelocity = new Vector2(horizontalInput * spikeHorizontalForce, spikeBounceForce);
+    }
+
+    IEnumerator InvincibilityCoroutine()
+    {
+        isInvincible = true;
+        yield return new WaitForSeconds(invincibilityDuration);
+        isInvincible = false;
     }
 
     public void Heal(int segmentsGained)

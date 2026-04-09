@@ -1418,12 +1418,17 @@ TextureImporter:
         y: 127
         width: 18
         height: 34
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      alignment: 9
+      pivot: {x: 0.5, y: 0.735}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
-      physicsShape: []
+      physicsShape:
+      - - {x: 8, y: 1}
+        - {x: 8, y: 16}
+        - {x: -8, y: 16}
+        - {x: -8, y: 1}
+        - {x: -1, y: -10}
       tessellationDetail: 0
       bones: []
       spriteID: 488dc5b321b6dfc40800000000000000

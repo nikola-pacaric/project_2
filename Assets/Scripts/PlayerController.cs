@@ -191,6 +191,7 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         if (isClimbing) return; // velocity is set in Update while climbing
+        if (lockMovementTimer > 0f) return; // preserve knockback velocity
 
         float platformVelX = (currentPlatform != null && currentPlatform.IsActive)
             ? currentPlatform.Velocity.x : 0f;
