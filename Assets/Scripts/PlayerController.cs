@@ -289,6 +289,10 @@ public class PlayerController : MonoBehaviour
         {
             if (isStomping) return;
 
+            // Landing on top of the enemy — let the stomp trigger handle it
+            ContactPoint2D contact = collision.GetContact(0);
+            if (contact.normal.y > 0.5f) return;
+
             if (TryGetComponent<PlayerHealth>(out PlayerHealth ph))
                 ph.TakeEnemyDamage(1);
         }
