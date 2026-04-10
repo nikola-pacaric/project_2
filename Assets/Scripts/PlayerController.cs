@@ -32,6 +32,7 @@ public class PlayerController : MonoBehaviour
     public bool isGrounded;
     private bool wasGrounded;
     private float lockMovementTimer;
+    private float facingLockTimer;
 
     // Climbing state
     private bool isOnLadder;
@@ -86,10 +87,14 @@ public class PlayerController : MonoBehaviour
         }
 
         // ── Facing direction ──────────────────────────────────────────────────
-        if (moveInput.x > 0.05f)
-            transform.localScale = new Vector3(1, 1, 1);
-        else if (moveInput.x < -0.05f)
-            transform.localScale = new Vector3(-1, 1, 1);
+        facingLockTimer -= Time.deltaTime;
+        if (facingLockTimer <= 0f)
+        {
+            if (moveInput.x > 0.05f)
+                transform.localScale = new Vector3(1, 1, 1);
+            else if (moveInput.x < -0.05f)
+                transform.localScale = new Vector3(-1, 1, 1);
+        }
 
         // ── Ground check ─────────────────────────────────────────────────────
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundRadius, groundLayer);
@@ -363,6 +368,7 @@ public class PlayerController : MonoBehaviour
     }
 
     public void LockMovement(float duration) => lockMovementTimer = duration;
+    public void LockFacing(float duration) => facingLockTimer = duration;
 
     private void OnDrawGizmosSelected()
     {

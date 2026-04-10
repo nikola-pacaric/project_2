@@ -6,6 +6,6 @@ public class SlashAttack : MonoBehaviour
 
     public void DealDamage()
     {
-        playerCombar.ApplyDamage();
+        playerCombar.ApplyDamage(transform.position);
     }
 }

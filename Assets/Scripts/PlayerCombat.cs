@@ -11,7 +11,6 @@ public class PlayerCombat : MonoBehaviour
     public LayerMask enemyLayers;
 
     private PlayerControls controls;
-    private Animator slashAnimator;
 
     public float attackCooldown = 0.5f;
     private bool canAttack = true;
@@ -21,11 +20,6 @@ public class PlayerCombat : MonoBehaviour
     {
         controls = new PlayerControls();
         controls.Player.Melee_Attack.performed += ctx => MeleeAttack();
-
-        if (fireSlashPrefab != null)
-        {
-            slashAnimator = fireSlashPrefab.GetComponent<Animator>();
-        }
     }
 
     private void OnEnable()
@@ -42,16 +36,28 @@ public class PlayerCombat : MonoBehaviour
         if (!canAttack) return;
         if (fireSlashPrefab != null)
         {
-            fireSlashPrefab.SetActive(true);
-            slashAnimator.SetTrigger("PlaySlash");
+            GameObject instance = Instantiate(fireSlashPrefab, attackPoint.position, Quaternion.identity, transform);
+
+            SlashAttack sa = instance.GetComponent<SlashAttack>();
+            if (sa != null)
+                sa.playerCombar = this;
+
+            Animator instanceAnim = instance.GetComponent<Animator>();
+            if (instanceAnim != null)
+                instanceAnim.SetTrigger("PlaySlash");
+
+            if (TryGetComponent<PlayerController>(out PlayerController pc))
+                pc.LockFacing(attackCooldown);
+
+            Destroy(instance, attackCooldown);
         }
 
         StartCoroutine(AttackCooldownRoutine());
     }
 
-    public void ApplyDamage()
+    public void ApplyDamage(Vector2 position)
     {
-        Collider2D[] hitEnemies = Physics2D.OverlapBoxAll(attackPoint.position, new Vector2(attackRangeX, attackRangeY), 0f, enemyLayers);
+        Collider2D[] hitEnemies = Physics2D.OverlapBoxAll(position, new Vector2(attackRangeX, attackRangeY), 0f, enemyLayers);
 
         foreach (Collider2D enemy in hitEnemies)
         {

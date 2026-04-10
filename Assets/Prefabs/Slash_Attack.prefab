@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 6690202109230279437}
   - component: {fileID: 434663753841378617}
   - component: {fileID: 777031806489916696}
+  - component: {fileID: 6639605854692879365}
   m_Layer: 0
   m_Name: Slash_Attack
   m_TagString: Untagged
@@ -114,3 +115,16 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &6639605854692879365
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5472208637245302606}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06e3bc699f83f3e46afe584e45e7e539, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SlashAttack
+  playerCombar: {fileID: 0}
