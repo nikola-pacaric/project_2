@@ -61,7 +61,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -75,7 +75,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 20
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -99,7 +99,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -133,6 +133,32 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
@@ -140,12 +166,12 @@ TextureImporter:
       name: sunny-mushroom-jump_0
       rect:
         serializedVersion: 2
-        x: 12
+        x: 5
         y: 0
-        width: 25
-        height: 27
+        width: 41
+        height: 30
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -162,12 +188,12 @@ TextureImporter:
       name: sunny-mushroom-jump_1
       rect:
         serializedVersion: 2
-        x: 156
+        x: 149
         y: 0
-        width: 28
-        height: 24
+        width: 41
+        height: 30
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -184,12 +210,12 @@ TextureImporter:
       name: sunny-mushroom-jump_2
       rect:
         serializedVersion: 2
-        x: 306
+        x: 288
         y: 0
-        width: 26
-        height: 33
+        width: 144
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -206,12 +232,12 @@ TextureImporter:
       name: sunny-mushroom-jump_3
       rect:
         serializedVersion: 2
-        x: 458
-        y: 15
-        width: 29
-        height: 26
+        x: 432
+        y: 0
+        width: 144
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -228,12 +254,12 @@ TextureImporter:
       name: sunny-mushroom-jump_4
       rect:
         serializedVersion: 2
-        x: 629
-        y: 21
-        width: 25
-        height: 31
+        x: 576
+        y: 0
+        width: 144
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -250,12 +276,12 @@ TextureImporter:
       name: sunny-mushroom-jump_5
       rect:
         serializedVersion: 2
-        x: 796
-        y: 17
-        width: 28
-        height: 26
+        x: 720
+        y: 0
+        width: 144
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -272,12 +298,12 @@ TextureImporter:
       name: sunny-mushroom-jump_6
       rect:
         serializedVersion: 2
-        x: 951
-        y: 11
-        width: 34
-        height: 24
+        x: 864
+        y: 0
+        width: 144
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -294,12 +320,12 @@ TextureImporter:
       name: sunny-mushroom-jump_7
       rect:
         serializedVersion: 2
-        x: 1111
+        x: 1008
         y: 0
-        width: 28
-        height: 24
+        width: 144
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -316,12 +342,12 @@ TextureImporter:
       name: sunny-mushroom-jump_8
       rect:
         serializedVersion: 2
-        x: 1255
+        x: 1152
         y: 0
-        width: 25
-        height: 27
+        width: 144
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -338,7 +364,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 2e4bea3f5d60f8d45934e7ba44e7121d
     internalID: 0
     vertices: []
     indices: 
@@ -346,7 +372,9 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":9.0,"y":1.0},"gridSpriteSize":{"x":144.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":2,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
       sunny-mushroom-jump_0: 6963356322179448601
       sunny-mushroom-jump_1: -1226422638751504
