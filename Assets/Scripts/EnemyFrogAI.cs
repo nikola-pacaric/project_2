@@ -54,10 +54,12 @@ public class EnemyFrogAI : MonoBehaviour
     }
 
     // Returns false if there's a wall blocking the path or no ground at the destination.
-    private bool IsDestinationSafe()
+    private bool IsDestinationSafe() => IsTargetSafe(targetX);
+
+    private bool IsTargetSafe(float target)
     {
-        float dir = targetX > transform.position.x ? 1f : -1f;
-        float dist = Mathf.Abs(targetX - transform.position.x);
+        float dir = target > transform.position.x ? 1f : -1f;
+        float dist = Mathf.Abs(target - transform.position.x);
 
         bool wallBlocking = Physics2D.Raycast(
             rb.position + Vector2.up * 0.2f,
@@ -66,7 +68,7 @@ public class EnemyFrogAI : MonoBehaviour
             groundLayer
         );
 
-        Vector2 destCheck = new Vector2(targetX, transform.position.y + 0.1f);
+        Vector2 destCheck = new Vector2(target, transform.position.y + 0.1f);
         bool groundAtDest = Physics2D.Raycast(destCheck, Vector2.down, destGroundCheckDepth, groundLayer);
 
         return !wallBlocking && groundAtDest;
@@ -110,8 +112,12 @@ public class EnemyFrogAI : MonoBehaviour
         yield return new WaitForSeconds(tauntDuration);
         anim.SetBool("isTaunting", false);
 
-        targetX = (targetX == rightX) ? leftX : rightX;
-        sprite.flipX = (targetX == leftX);
+        float newTarget = (targetX == rightX) ? leftX : rightX;
+        if (IsTargetSafe(newTarget))
+        {
+            targetX = newTarget;
+            sprite.flipX = (targetX == leftX);
+        }
 
         isActing = false;
     }

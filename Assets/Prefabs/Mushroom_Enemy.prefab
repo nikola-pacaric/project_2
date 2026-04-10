@@ -14,9 +14,10 @@ GameObject:
   - component: {fileID: 2932658577195574656}
   - component: {fileID: 941792846506366146}
   - component: {fileID: 4509991634098482382}
+  - component: {fileID: 1447787341802821926}
   m_Layer: 9
   m_Name: Mushroom_Enemy
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -200,7 +201,7 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 128
-  wallCheckDist: 0.3
+  wallCheckDist: 1
   ledgeCheckForward: 0.4
   ledgeCheckHeightOffset: 0.3
   ledgeCheckDepth: 0.8
@@ -209,7 +210,22 @@ MonoBehaviour:
   mouthPoint: {fileID: 14354553416841655}
   preAttackDuration: 0.8
   attackWindUp: 0.3
-  postAttackCooldown: 3
+  postAttackCooldown: 2
+--- !u!114 &1447787341802821926
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3264573772000371355}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b56eb25482608447af4f7e9ff9e2c7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
+  maxHealth: 3
+  currentHealth: 0
+  deathAnimationPrefab: {fileID: 2909153326865099594, guid: 42ed730af960d4e43a2107a636a68281, type: 3}
 --- !u!1 &5654989905640129523
 GameObject:
   m_ObjectHideFlags: 0
@@ -222,7 +238,7 @@ GameObject:
   - component: {fileID: 6829545022784498995}
   m_Layer: 9
   m_Name: Stomp_Box
-  m_TagString: Untagged
+  m_TagString: Stomp
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -323,7 +339,7 @@ Transform:
   m_GameObject: {fileID: 6312369233183678001}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.403, y: -0.487, z: 0}
+  m_LocalPosition: {x: 0.66, y: 0.08, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

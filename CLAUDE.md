@@ -76,6 +76,11 @@ All enemy AI should follow the same base pattern (matching the existing `EnemyFr
 - New levels = new Scenes added to Build Settings.
 - Each scene should have: Player prefab, Cinemachine camera, Tilemap, background parallax layers, at least one Bonfire checkpoint.
 
+### Animation
+- **Always use Animator Controller parameters** (`SetBool`, `SetTrigger`, `SetFloat`) to drive sprite animation transitions. Never use `anim.Play()` directly from gameplay scripts.
+- The Animator Controller is the source of truth for animation state. Code only sets parameters — the Controller handles all transitions, timing, and clip playback.
+- Calling `anim.Play()` every frame restarts the clip from frame 0 and breaks looping animations. If `anim.Play()` must be used (e.g. for a one-off setup), guard it with `IsName()` to prevent re-triggering.
+
 ### Audio (when implementing)
 - Use an **AudioManager singleton** with separate mixer groups for: Music, SFX, UI.
 - All SFX triggered via `AudioManager.Instance.PlaySFX(clipName)` — no direct `AudioSource.PlayClipAtPoint` in gameplay scripts.
