@@ -5,31 +5,39 @@ public class ParallaxLayers : MonoBehaviour
 
     public Transform cameraTransform;
     public float parallaxFactor = 0.5f;
+    // 1 = background follows camera vertically at full speed (no drift, always fills screen).
+    // Lower values create a depth effect but require a taller sprite to avoid gaps.
+    public float parallaxFactorY = 1f;
 
-    private float startPosX, startPosY, length;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    private float length;
+    private float posX, posY;
+    private float prevCamX, prevCamY;
+
     void Start()
     {
-        startPosX = transform.position.x;
-        startPosY = transform.position.y;
+        posX = transform.position.x;
+        posY = transform.position.y;
+        prevCamX = cameraTransform.position.x;
+        prevCamY = cameraTransform.position.y;
         length = GetComponent<SpriteRenderer>().bounds.size.x;
     }
 
-    // Update is called once per frame
     void FixedUpdate()
     {
-        float distance = cameraTransform.position.x * parallaxFactor;
-        float distanceY = cameraTransform.position.y * parallaxFactor;
-        float movement = cameraTransform.position.x * (1 - parallaxFactor);
+        // Use per-frame delta so the formula is correct regardless of where the camera starts
+        float dx = cameraTransform.position.x - prevCamX;
+        float dy = cameraTransform.position.y - prevCamY;
+        prevCamX = cameraTransform.position.x;
+        prevCamY = cameraTransform.position.y;
 
-        transform.position = new Vector3(startPosX + distance, startPosY + distanceY, transform.position.z);
+        posX += dx * parallaxFactor;
+        posY += dy * parallaxFactorY;
 
-        if (movement > startPosX + length)
-        {
-            startPosX += length;
-        } else if(movement < startPosX - length)
-        {
-            startPosX -= length;
-        }
+        transform.position = new Vector3(posX, posY, transform.position.z);
+
+        // Infinite horizontal tiling: shift by one sprite width when camera drifts past it
+        float relX = cameraTransform.position.x - posX;
+        if (relX > length)       posX += length;
+        else if (relX < -length) posX -= length;
     }
 }

@@ -235,8 +235,8 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 128
-  ceilingCheckDist: 1
-  ceilingCheckRadius: 0.3
+  ceilingCheckDist: 0.5
+  ceilingCheckRadius: 0.5
   stuckTeleportTime: 5
 --- !u!50 &742526394616335278
 Rigidbody2D:
