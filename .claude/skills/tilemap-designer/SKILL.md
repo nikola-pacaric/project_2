@@ -27,8 +27,11 @@ Use this fixed palette for tile types. The specific types will vary by game genr
 | Blue | `#4488ff` | Puzzle / interactive | Switches, pressure plates, puzzle elements |
 | Purple | `#aa44ff` | Locked / gated | Areas requiring abilities, locked doors |
 | Yellow-orange | `#ffaa00` | Enemy / hazard | Enemy spawn positions, patrol markers |
-| Cyan | `#00cccc` | Collectable / reward | Gems, coins, power-ups, treasure |
+| Cyan | `#00cccc` | Common collectable | Coins, score items, regular pickups — appear many times per level |
+| Hot pink | `#ff44aa` | Rare / special item | Health hearts, key items, story-critical rewards — appear once or very rarely per level |
 | White | `#ffffff` | Empty / air | Open space the player moves through |
+
+**Common vs Rare collectables must always be visually distinct.** Cyan is for things scattered freely (coins, score gems). Hot pink is reserved for things that meaningfully change the player's state (extra heart, key item, ability unlock). Never use the same color for both — a health heart hidden in a corner is not the same design signal as a coin trail.
 
 If the game type needs additional categories (e.g., water, moving platforms, teleporters), pick distinct colors that don't conflict with the existing palette and add them to the legend.
 
@@ -120,6 +123,25 @@ The `render()` function should draw layers in this order (back to front):
 
 Use dashed lines (`ctx.setLineDash([4, 4])`) in light gray (`#ccc`) to visually separate major sections of the level. These help the user understand the pacing and structure at a glance. Place them at the column boundaries between distinct gameplay areas.
 
+## Solid Tiles Represent Real Game Geometry — Not Visual Decoration
+
+**Never place solid (black) tiles purely for aesthetic purposes.** Every `S` tile in the map represents a real impassable block that will exist in the game. If you want to visually separate two sections or give a room a "corridor feel," use the dashed section divider lines — not `vline()` or `fillRect()` walls.
+
+Specifically, do NOT do this:
+```javascript
+// WRONG — phantom walls that don't exist in the game
+vline(155, 10, 29, S);  // "puzzle room wall" — looks wrong on the design
+vline(245, 10, 29, S);
+```
+
+Do this instead:
+```javascript
+// CORRECT — dashed divider communicates section boundary without implying geometry
+SECTION_DIVIDERS.push(150);  // or add to the array at the bottom
+```
+
+The designer is a blueprint that a developer follows. A solid black tile tells them "build a wall here." Only draw it if you actually want a wall there.
+
 ## Quality Checklist
 
 Before finalizing the HTML file, verify:
@@ -129,6 +151,8 @@ Before finalizing the HTML file, verify:
 - [ ] Annotations are near what they describe and use matching colors
 - [ ] The map tells a spatial story — you can trace the player's path from start to finish
 - [ ] Ground/walls form a coherent, enclosed space (no accidental gaps unless intentional)
+- [ ] No phantom walls — every solid tile represents geometry that will exist in the game
+- [ ] Common collectables (cyan) and rare/special items (hot pink) are never mixed — if the game has both, both colors are used
 - [ ] Zoom controls work and the default zoom shows the full map
 - [ ] The file is completely self-contained (no external dependencies)
 - [ ] All CSS is in a `<style>` tag, all JS is in a `<script>` tag
