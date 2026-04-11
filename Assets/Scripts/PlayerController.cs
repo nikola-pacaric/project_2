@@ -47,7 +47,6 @@ public class PlayerController : MonoBehaviour
     private Animator anim;
     private Collider2D col;
     private PlayerControls controls;
-    private MovingPlatform currentPlatform;
 
     // Input
     private Vector2 moveInput;
@@ -166,9 +165,7 @@ public class PlayerController : MonoBehaviour
         anim.SetBool("isClimbing", false);
 
         // ── Normal movement ───────────────────────────────────────────────────
-        float platformVelX = (currentPlatform != null && currentPlatform.IsActive)
-            ? currentPlatform.Velocity.x : 0f;
-        float targetSpeed = moveInput.x * moveSpeed + platformVelX;
+        float targetSpeed = moveInput.x * moveSpeed;
         float accel  = isGrounded ? groundAcceleration : airAcceleration;
         float newX   = Mathf.MoveTowards(rb.linearVelocity.x, targetSpeed, accel * Time.deltaTime);
         rb.linearVelocity = new Vector2(newX, rb.linearVelocity.y);
@@ -198,10 +195,8 @@ public class PlayerController : MonoBehaviour
         if (isClimbing) return; // velocity is set in Update while climbing
         if (lockMovementTimer > 0f) return; // preserve knockback velocity
 
-        float platformVelX = (currentPlatform != null && currentPlatform.IsActive)
-            ? currentPlatform.Velocity.x : 0f;
         float slopeBoost  = isGrounded && !jumpPressed ? 1.5f : 1f;
-        float targetSpeed = moveInput.x * moveSpeed * slopeBoost + platformVelX;
+        float targetSpeed = moveInput.x * moveSpeed * slopeBoost;
         float accel  = isGrounded ? groundAcceleration : airAcceleration;
         float newX   = Mathf.MoveTowards(rb.linearVelocity.x, targetSpeed, accel * Time.deltaTime);
         Vector2 desiredVelocity = new Vector2(newX, rb.linearVelocity.y);
@@ -302,29 +297,6 @@ public class PlayerController : MonoBehaviour
                 ph.TakeEnemyDamage(1);
         }
 
-        TrySetPlatform(collision);
-    }
-
-    private void OnCollisionStay2D(Collision2D collision) => TrySetPlatform(collision);
-
-    private void OnCollisionExit2D(Collision2D collision)
-    {
-        if (currentPlatform != null && collision.gameObject == currentPlatform.gameObject)
-            currentPlatform = null;
-    }
-
-    private void TrySetPlatform(Collision2D collision)
-    {
-        if (currentPlatform != null) return;
-        if (!collision.gameObject.TryGetComponent<MovingPlatform>(out MovingPlatform platform)) return;
-        foreach (ContactPoint2D contact in collision.contacts)
-        {
-            if (contact.normal.y > 0.5f)
-            {
-                currentPlatform = platform;
-                return;
-            }
-        }
     }
 
     // ── Misc helpers ─────────────────────────────────────────────────────────
