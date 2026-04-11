@@ -2,42 +2,42 @@ using UnityEngine;
 
 public class ParallaxLayers : MonoBehaviour
 {
+    [SerializeField] private Transform cameraTransform;
+    [SerializeField] private float parallaxFactor = 0.5f;
+    [SerializeField] private float offsetY = 0f;
 
-    public Transform cameraTransform;
-    public float parallaxFactor = 0.5f;
-    // 1 = background follows camera vertically at full speed (no drift, always fills screen).
-    // Lower values create a depth effect but require a taller sprite to avoid gaps.
-    public float parallaxFactorY = 1f;
+    private Camera _cam;
+    private float _baseOrthoSize;
+    private float _baseLength;
+    private float _posX;
+    private float _prevCamX;
 
-    private float length;
-    private float posX, posY;
-    private float prevCamX, prevCamY;
-
-    void Start()
+    private void Start()
     {
-        posX = transform.position.x;
-        posY = transform.position.y;
-        prevCamX = cameraTransform.position.x;
-        prevCamY = cameraTransform.position.y;
-        length = GetComponent<SpriteRenderer>().bounds.size.x;
+        _posX = transform.position.x;
+        _prevCamX = cameraTransform.position.x;
+        _cam = cameraTransform.GetComponent<Camera>();
+        _baseOrthoSize = _cam.orthographicSize;
+        _baseLength = GetComponent<SpriteRenderer>().bounds.size.x;
     }
 
-    void FixedUpdate()
+    private void LateUpdate()
     {
-        // Use per-frame delta so the formula is correct regardless of where the camera starts
-        float dx = cameraTransform.position.x - prevCamX;
-        float dy = cameraTransform.position.y - prevCamY;
-        prevCamX = cameraTransform.position.x;
-        prevCamY = cameraTransform.position.y;
+        float dx = cameraTransform.position.x - _prevCamX;
+        _prevCamX = cameraTransform.position.x;
+        _posX += dx * parallaxFactor;
 
-        posX += dx * parallaxFactor;
-        posY += dy * parallaxFactorY;
+        // Scale uniformly to always fill the screen regardless of zoom level
+        float scale = _cam.orthographicSize / _baseOrthoSize;
+        transform.localScale = new Vector3(scale, scale, 1f);
 
-        transform.position = new Vector3(posX, posY, transform.position.z);
+        // Y always locked to camera — never drifts out vertically
+        transform.position = new Vector3(_posX, cameraTransform.position.y + offsetY, transform.position.z);
 
-        // Infinite horizontal tiling: shift by one sprite width when camera drifts past it
-        float relX = cameraTransform.position.x - posX;
-        if (relX > length)       posX += length;
-        else if (relX < -length) posX -= length;
+        // Infinite horizontal tiling — account for current scale
+        float length = _baseLength * scale;
+        float relX = cameraTransform.position.x - _posX;
+        if (relX > length)       _posX += length;
+        else if (relX < -length) _posX -= length;
     }
 }
