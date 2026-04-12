@@ -46,6 +46,9 @@ public class MovingPlatform : MonoBehaviour
     private Vector2 worldPointB;
 
     private readonly List<Collider2D> riders = new List<Collider2D>();
+    private readonly List<Rigidbody2D> pass1Rbs = new List<Rigidbody2D>();
+    private readonly List<Collider2D> secondaryRiders = new List<Collider2D>();
+    private ContactFilter2D carryFilter;
 
     // ── Properties ────────────────────────────────────────────────────────────
 
@@ -60,6 +63,9 @@ public class MovingPlatform : MonoBehaviour
 
         if (platformSprite == null)
             platformSprite = GetComponent<SpriteRenderer>();
+
+        carryFilter = new ContactFilter2D();
+        carryFilter.useTriggers = false;
     }
 
     private void Start()
@@ -157,28 +163,59 @@ public class MovingPlatform : MonoBehaviour
         if (delta == Vector2.zero) return;
 
         BoxCollider2D col = GetComponent<BoxCollider2D>();
-        Vector2 checkCenter = rb.position + col.offset + Vector2.up * (col.size.y * 0.5f + 0.05f);
-        Vector2 checkSize = new Vector2(col.size.x * 0.9f, 0.1f);
 
-        ContactFilter2D filter = new ContactFilter2D();
-        filter.useTriggers = false;
-
+        // Pass 1 — objects directly on the platform surface.
+        pass1Rbs.Clear();
         riders.Clear();
-        Physics2D.OverlapBox(checkCenter, checkSize, 0f, filter, riders);
+        CheckAbove(rb.position + col.offset, col.size, riders);
 
         foreach (Collider2D rider in riders)
         {
             Rigidbody2D riderRb = rider.attachedRigidbody;
             if (riderRb == null || riderRb == rb) continue;
 
-            // Teleport all riders by the platform delta. Y only carries upward — gravity
-            // handles downward separation naturally.
-            float xCarry = delta.x;
-            float yCarry = delta.y > 0f ? delta.y : 0f;
-
-            if (xCarry != 0f || yCarry != 0f)
-                riderRb.position += new Vector2(xCarry, yCarry);
+            if (TeleportRider(riderRb, delta))
+                pass1Rbs.Add(riderRb);
         }
+
+        // Pass 2 — objects on top of pass-1 riders (e.g. player standing on a
+        // PressurePlate that is itself sitting on the platform).
+        foreach (Rigidbody2D p1Rb in pass1Rbs)
+        {
+            if (!p1Rb.TryGetComponent<BoxCollider2D>(out BoxCollider2D p1Col)) continue;
+
+            secondaryRiders.Clear();
+            CheckAbove(p1Rb.position + p1Col.offset, p1Col.size, secondaryRiders);
+
+            foreach (Collider2D rider in secondaryRiders)
+            {
+                Rigidbody2D riderRb = rider.attachedRigidbody;
+                if (riderRb == null || riderRb == rb || pass1Rbs.Contains(riderRb)) continue;
+                TeleportRider(riderRb, delta);
+            }
+        }
+    }
+
+    // Returns true if the rider was actually moved (so pass-2 can check above it).
+    private bool TeleportRider(Rigidbody2D riderRb, Vector2 delta)
+    {
+        float xCarry = delta.x;
+        // Dynamic riders: only carry upward — gravity handles downward naturally.
+        // Kinematic riders (e.g. PressurePlate): carry both ways — no gravity to pull them down.
+        float yCarry = riderRb.bodyType == RigidbodyType2D.Kinematic
+            ? delta.y
+            : (delta.y > 0f ? delta.y : 0f);
+
+        if (xCarry == 0f && yCarry == 0f) return false;
+        riderRb.position += new Vector2(xCarry, yCarry);
+        return true;
+    }
+
+    private void CheckAbove(Vector2 center, Vector2 size, List<Collider2D> results)
+    {
+        Vector2 checkCenter = center + Vector2.up * (size.y * 0.5f + 0.05f);
+        Vector2 checkSize   = new Vector2(size.x * 0.9f, 0.1f);
+        Physics2D.OverlapBox(checkCenter, checkSize, 0f, carryFilter, results);
     }
 
     private IEnumerator SlideToA()

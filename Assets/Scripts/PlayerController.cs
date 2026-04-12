@@ -323,6 +323,7 @@ public class PlayerController : MonoBehaviour
 
             Rigidbody2D boxRb = hit.rigidbody ?? hit.collider.attachedRigidbody;
             if (boxRb == null) continue;
+            if (!boxRb.TryGetComponent<PushableBox>(out _)) continue;
 
             boxRb.linearVelocity = new Vector2(dir * boxPushSpeed, boxRb.linearVelocity.y);
             return;
