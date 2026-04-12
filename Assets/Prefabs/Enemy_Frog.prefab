@@ -163,13 +163,14 @@ MonoBehaviour:
   jumpHeight: 4
   jumpForward: 2
   timeBetweenJumps: 1
-  patrolDistance: 3
+  patrolDistance: 1.7
   tauntDuration: 1
   groundLayer:
     serializedVersion: 2
     m_Bits: 136
   groundCheck: {fileID: 1020233824532650519}
   groundCheckRadius: 0.1
+  destGroundCheckDepth: 1.5
 --- !u!114 &3831702886305489233
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Arc_1 — Recovered Layout</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f4f4f4; font-family: 'Consolas', 'Courier New', monospace; color: #333; }
+
+    .header {
+      text-align: center;
+      padding: 18px 20px 14px;
+      background: white;
+      border-bottom: 1px solid #ddd;
+    }
+    h1 { font-size: 20px; font-weight: bold; letter-spacing: 1px; }
+    .subtitle { font-size: 11px; color: #888; margin-top: 4px; }
+
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      padding: 10px 20px;
+      background: white;
+      border-bottom: 1px solid #ddd;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+    }
+    .swatch {
+      width: 16px;
+      height: 16px;
+      border: 1px solid #bbb;
+      border-radius: 2px;
+    }
+
+    .canvas-wrap {
+      overflow: auto;
+      padding: 24px 20px 20px 56px; /* left pad for y-axis labels */
+      position: relative;
+    }
+    canvas { display: block; cursor: crosshair; image-rendering: pixelated; }
+
+    .controls {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .controls button {
+      width: 44px;
+      height: 32px;
+      font-size: 16px;
+      font-weight: bold;
+      background: white;
+      border: 1px solid #bbb;
+      border-radius: 4px;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+    .controls button:hover { background: #f0f0f0; }
+
+    .info-bar {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(255,255,255,0.95);
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 6px 12px;
+      font-size: 11px;
+      color: #555;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Arc_1 — Recovered Layout</h1>
+  <div class="subtitle">
+    106 × 7 tiles &nbsp;·&nbsp; recovered from git commit 88ad579 &nbsp;·&nbsp;
+    Unity coords x: 0–105, y: −2 to 4 &nbsp;·&nbsp; 248 tiles total
+  </div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="swatch" style="background:#111111"></div>Ground (y=0)</div>
+  <div class="legend-item"><div class="swatch" style="background:#2e7d32"></div>Platform (y=1–4)</div>
+  <div class="legend-item"><div class="swatch" style="background:#424242"></div>Underground (y=−1, −2)</div>
+  <div class="legend-item"><div class="swatch" style="background:#ffffff;border:1px solid #bbb"></div>Empty / Air</div>
+</div>
+
+<div class="canvas-wrap" id="wrap">
+  <canvas id="map"></canvas>
+</div>
+
+<div class="controls">
+  <button onclick="zoom(1)"  title="Zoom in">+</button>
+  <button onclick="zoom(-1)" title="Zoom out">−</button>
+  <button onclick="resetZoom()" title="Reset">⊙</button>
+</div>
+
+<div class="info-bar" id="infoBar">Hover over a tile to see its Unity coordinates</div>
+
+<script>
+  // ── Tile type constants ──────────────────────────────────────────────────
+  const E = 0; // Empty / air
+  const G = 1; // Ground     (#111111)
+  const P = 2; // Platform   (#2e7d32)
+  const U = 3; // Underground (#424242)
+
+  const COLORS = { [G]: '#111111', [P]: '#2e7d32', [U]: '#424242' };
+
+  // ── Grid dimensions ──────────────────────────────────────────────────────
+  // Columns : x = 0..105  → 106 cols
+  // Rows    : Unity y=4 (top) .. y=-2 (bottom) → 7 rows
+  //   row = 4 - unityY
+  const COLS = 106;
+  const ROWS = 7;
+
+  const grid = Array.from({ length: ROWS }, () => new Array(COLS).fill(E));
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  function set(ux, uy, type) {
+    const r = 4 - uy;
+    if (r >= 0 && r < ROWS && ux >= 0 && ux < COLS) grid[r][ux] = type;
+  }
+  function hline(uy, x1, x2, type) {
+    for (let x = x1; x <= x2; x++) set(x, uy, type);
+  }
+
+  // ── Tile data (recovered from git 88ad579) ────────────────────────────────
+
+  // Ground   y=0
+  hline(0,  0, 25, G);   // Opening ground
+  set(37, 0, G);          // Pit left lip
+  set(38, 0, G);
+  hline(0, 42, 71, G);   // Pit / mid-level ground
+  hline(0, 75, 82, G);   // Far ground
+
+  // Platforms  y=1
+  hline(1,  3, 17, P);   // Low platform, opening section
+  hline(1, 21, 25, P);   // Short ledge
+  set(37, 1, P);
+  hline(1, 58, 62, P);
+  hline(1, 66, 71, P);
+  set(75, 1, P);
+  hline(1, 79, 94, P);   // Long staircase base
+
+  // Platforms  y=2
+  set(25, 2, P);
+  set(27, 2, P);
+  set(28, 2, P);
+  set(37, 2, P);
+  set(40, 2, P);
+  set(55, 2, P);
+  set(58, 2, P);
+  hline(2, 71, 75, P);
+  hline(2, 83, 88, P);
+  hline(2, 92, 97, P);
+
+  // Platforms  y=3
+  set(30, 3, P);
+  set(31, 3, P);
+  hline(3, 34, 37, P);
+  hline(3, 40, 55, P);   // Big raised platform over pit
+  set(58, 3, P);
+  hline(3, 71, 75, P);
+  hline(3, 95, 105, P);  // End section upper floor
+
+  // Platforms  y=4
+  hline(4, 34, 37, P);
+  hline(4, 40, 44, P);
+  hline(4, 48, 55, P);
+  set(58, 4, P);
+  hline(4, 98, 105, P);  // Top of end section
+
+  // Underground  y=-1
+  hline(-1, 37, 58, U);
+
+  // Underground  y=-2
+  hline(-2, 37, 58, U);
+
+  // ── Section dividers (visual only, no geometry) ───────────────────────────
+  const DIVIDERS = [26, 41, 59, 73, 83, 95];
+
+  // ── Section labels  [unityX, unityY, text] ────────────────────────────────
+  // Placed in empty air space near top of each section
+  const LABELS = [
+    { x:  1, y: 4, text: 'Opening',    color: '#999' },
+    { x: 27, y: 4, text: 'Gap',        color: '#999' },
+    { x: 42, y: 4, text: 'Pit',        color: '#999' },
+    { x: 59, y: 4, text: 'Platforms',  color: '#999' },
+    { x: 80, y: 2, text: 'Staircase',  color: '#999' },
+    { x: 96, y: 4, text: 'End',        color: '#999' },
+  ];
+
+  // ── Render ────────────────────────────────────────────────────────────────
+  let tileSize = 12;
+  const Y_LABELS = ['y=4','y=3','y=2','y=1','y=0','y=−1','y=−2'];
+
+  const canvas = document.getElementById('map');
+  const ctx    = canvas.getContext('2d');
+
+  function render() {
+    const W = COLS * tileSize;
+    const H = ROWS * tileSize + 28; // +28 for x-axis labels
+    canvas.width  = W;
+    canvas.height = H;
+
+    // Background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, W, H);
+
+    // Grid lines (only when tile big enough to read)
+    if (tileSize >= 5) {
+      ctx.strokeStyle = '#e0e0e0';
+      ctx.lineWidth = 0.5;
+      for (let c = 0; c <= COLS; c++) {
+        ctx.beginPath(); ctx.moveTo(c * tileSize, 0); ctx.lineTo(c * tileSize, ROWS * tileSize); ctx.stroke();
+      }
+      for (let r = 0; r <= ROWS; r++) {
+        ctx.beginPath(); ctx.moveTo(0, r * tileSize); ctx.lineTo(W, r * tileSize); ctx.stroke();
+      }
+    }
+
+    // Tiles
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        const t = grid[r][c];
+        if (t !== E) {
+          ctx.fillStyle = COLORS[t];
+          ctx.fillRect(c * tileSize, r * tileSize, tileSize, tileSize);
+        }
+      }
+    }
+
+    // Section dividers
+    ctx.save();
+    ctx.setLineDash([4, 4]);
+    ctx.strokeStyle = '#cccccc';
+    ctx.lineWidth = 1;
+    for (const col of DIVIDERS) {
+      ctx.beginPath();
+      ctx.moveTo(col * tileSize, 0);
+      ctx.lineTo(col * tileSize, ROWS * tileSize);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // X-axis column labels (every 10)
+    ctx.fillStyle = '#999';
+    ctx.font = `${Math.max(8, Math.min(11, tileSize))}px Consolas, monospace`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    for (let c = 0; c <= COLS; c += 10) {
+      ctx.fillText(String(c), c * tileSize, ROWS * tileSize + 6);
+    }
+
+    // Section labels
+    ctx.textBaseline = 'middle';
+    for (const lbl of LABELS) {
+      const r = 4 - lbl.y;
+      ctx.fillStyle = lbl.color;
+      ctx.font = `bold ${Math.max(8, Math.min(11, tileSize))}px Consolas, monospace`;
+      ctx.textAlign = 'left';
+      ctx.fillText(lbl.text, lbl.x * tileSize + 2, r * tileSize + tileSize / 2);
+    }
+
+    // Draw Y-axis labels outside canvas (as positioned divs)
+    renderYLabels();
+  }
+
+  // Y-axis labels rendered as DOM elements so they scroll with the canvas
+  let yLabelEls = [];
+  function renderYLabels() {
+    // Remove old
+    yLabelEls.forEach(el => el.remove());
+    yLabelEls = [];
+
+    const wrap = document.getElementById('wrap');
+    const canvasRect = canvas.getBoundingClientRect();
+    const wrapRect   = wrap.getBoundingClientRect();
+
+    for (let r = 0; r < ROWS; r++) {
+      const el = document.createElement('div');
+      el.textContent = Y_LABELS[r];
+      el.style.cssText = `
+        position: absolute;
+        right: calc(100% - 56px + 4px);
+        top: ${24 + r * tileSize}px;
+        height: ${tileSize}px;
+        line-height: ${tileSize}px;
+        font: ${Math.max(8, Math.min(11, tileSize))}px Consolas,monospace;
+        color: #aaa;
+        white-space: nowrap;
+        text-align: right;
+        width: 50px;
+      `;
+      wrap.appendChild(el);
+      yLabelEls.push(el);
+    }
+  }
+
+  function zoom(dir) {
+    tileSize = Math.max(3, Math.min(24, tileSize + dir * 2));
+    render();
+  }
+  function resetZoom() {
+    tileSize = 12;
+    render();
+  }
+
+  // Hover: show Unity coords + tile type
+  const TYPE_NAMES = { [E]: 'Empty', [G]: 'Ground', [P]: 'Platform', [U]: 'Underground' };
+  canvas.addEventListener('mousemove', e => {
+    const rect = canvas.getBoundingClientRect();
+    const cx = Math.floor((e.clientX - rect.left)  / tileSize);
+    const cy = Math.floor((e.clientY - rect.top)   / tileSize);
+    if (cx >= 0 && cx < COLS && cy >= 0 && cy < ROWS) {
+      const ux = cx;
+      const uy = 4 - cy;
+      const t  = grid[cy][cx];
+      document.getElementById('infoBar').textContent =
+        `Unity x=${ux}, y=${uy}  ·  ${TYPE_NAMES[t]}`;
+    }
+  });
+
+  render();
+</script>
+</body>
+</html>
