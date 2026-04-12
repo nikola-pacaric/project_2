@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls *.html)",
+      "Bash(ls Arc2*.html)"
+    ]
+  }
+}
