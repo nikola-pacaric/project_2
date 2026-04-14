@@ -154,6 +154,23 @@ public class PlayerHealth : MonoBehaviour
         currentSegment = Mathf.Min(currentSegment + segmentsGained, maxHearts * segmentsPerHeart);
     }
 
+    public void RestoreState(int restoredMaxHearts, int restoredCurrentSegment)
+    {
+        HeartsUI ui = FindAnyObjectByType<HeartsUI>();
+        int heartsToAdd = restoredMaxHearts - maxHearts;
+
+        maxHearts = restoredMaxHearts;
+        currentSegment = Mathf.Clamp(restoredCurrentSegment, 0, maxHearts * segmentsPerHeart);
+
+        if (ui != null)
+        {
+            for (int i = 0; i < heartsToAdd; i++)
+            {
+                ui.AddHeart();
+            }
+        }
+    }
+
     private void GameOver()
     {
         transform.position = startingPossPoint;
