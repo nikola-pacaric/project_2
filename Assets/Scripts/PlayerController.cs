@@ -27,6 +27,7 @@ public class PlayerController : MonoBehaviour
     // Movement state
     private float coyoteTimeCounter;
     private bool jumpPressed;
+    private bool jumpQueued;
     private bool jumpConsumed;
     private bool isStomping;
     public bool isGrounded;
@@ -62,8 +63,8 @@ public class PlayerController : MonoBehaviour
         controls.Player.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
         controls.Player.Move.canceled  += ctx => moveInput = Vector2.zero;
 
-        controls.Player.Jump.performed += ctx => jumpPressed = true;
-        controls.Player.Jump.canceled  += ctx => { jumpPressed = false; jumpConsumed = false; };
+        controls.Player.Jump.performed += ctx => { jumpPressed = true; jumpQueued = true; };
+        controls.Player.Jump.canceled  += ctx => { jumpPressed = false; jumpQueued = false; };
     }
 
     private void OnEnable()  => controls.Player.Enable();
@@ -99,7 +100,10 @@ public class PlayerController : MonoBehaviour
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundRadius, groundLayer);
 
         if (isGrounded && !wasGrounded)
+        {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
+            jumpConsumed = false;
+        }
 
         wasGrounded = isGrounded;
 
@@ -139,13 +143,14 @@ public class PlayerController : MonoBehaviour
                 rb.linearVelocity = new Vector2(moveInput.x * moveSpeed, moveInput.y * climbSpeed);
 
                 // Jump off stairs
-                if (jumpPressed && !jumpConsumed)
+                if (jumpQueued && !jumpConsumed)
                 {
                     ExitClimb();
                     rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
                     anim.SetTrigger("jumpUp");
                     coyoteTimeCounter = 0f;
                     jumpConsumed = true;
+                    jumpQueued = false;
                 }
             }
         }
@@ -171,12 +176,13 @@ public class PlayerController : MonoBehaviour
         rb.linearVelocity = new Vector2(newX, rb.linearVelocity.y);
 
         // ── Jump ──────────────────────────────────────────────────────────────
-        if (jumpPressed && !jumpConsumed && coyoteTimeCounter > 0f)
+        if (jumpQueued && !jumpConsumed && coyoteTimeCounter > 0f)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
             anim.SetTrigger("jumpUp");
             coyoteTimeCounter = 0f;
             jumpConsumed = true;
+            jumpQueued = false;
         }
 
         // ── Animator ──────────────────────────────────────────────────────────
@@ -227,6 +233,7 @@ public class PlayerController : MonoBehaviour
         rb.linearVelocity = Vector2.zero;
         col.isTrigger = true;
         wasAirborneWhileClimbing = false;
+        jumpConsumed = false;
     }
 
     private void ExitClimb()

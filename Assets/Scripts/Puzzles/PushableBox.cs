@@ -13,7 +13,11 @@ public class PushableBox : MonoBehaviour
     [SerializeField] private Color normalColor = Color.white;
     [SerializeField] private Color pushedColor = new Color(1.0f, 0.85f, 0.5f);
 
+    [SerializeField] private float fallRespawnDistance = 5f;
+    [SerializeField] private Transform respawnPoint;
+
     private Rigidbody2D rb;
+    private Vector2 initialPosition;
 
     private void Awake()
     {
@@ -23,6 +27,24 @@ public class PushableBox : MonoBehaviour
         rb.sleepMode = RigidbodySleepMode2D.NeverSleep;
 
         if (boxSprite == null) boxSprite = GetComponent<SpriteRenderer>();
+
+        initialPosition = respawnPoint != null ? (Vector2)respawnPoint.position : (Vector2)transform.position;
+    }
+
+    private void FixedUpdate()
+    {
+        if (transform.position.y < initialPosition.y - fallRespawnDistance)
+        {
+            Respawn();
+        }
+    }
+
+    public void Respawn()
+    {
+        rb.linearVelocity = Vector2.zero;
+        rb.angularVelocity = 0f;
+        transform.position = initialPosition;
+        UpdateVisual(false);
     }
 
     private void OnCollisionStay2D(Collision2D collision)
