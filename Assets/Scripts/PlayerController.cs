@@ -24,6 +24,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float boxPushCastDistance = 0.12f;
     [SerializeField] private float minPushInput = 0.1f;
 
+    [Header("Stomp")]
+    [SerializeField] private float stompIgnoreDuration = 0.2f;
+
+    private static readonly ContactPoint2D[] contactBuffer = new ContactPoint2D[8];
+
     // Movement state
     private float coyoteTimeCounter;
     private bool jumpPressed;
@@ -274,7 +279,7 @@ public class PlayerController : MonoBehaviour
                 rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
                 anim.SetTrigger("jumpUp");
                 coyoteTimeCounter = 0f;
-                Invoke(nameof(ResetStomp), 0.1f);
+                Invoke(nameof(ResetStomp), stompIgnoreDuration);
             }
         }
     }
@@ -292,18 +297,27 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Enemy"))
+        if (!collision.gameObject.CompareTag("Enemy")) return;
+        if (isStomping) return;
+
+        // Let the stomp trigger handle any landing from above. The trigger and
+        // this collision can fire in the same physics step in unspecified
+        // order, so we also suppress damage when the geometry clearly shows a
+        // top-down hit: any contact with an up-facing normal, OR the player
+        // falling onto a point above the enemy's center.
+        float enemyCenterY = collision.collider.bounds.center.y;
+        bool landingFromAbove = rb.linearVelocity.y <= 0.1f;
+
+        int contactCount = collision.GetContacts(contactBuffer);
+        for (int i = 0; i < contactCount; i++)
         {
-            if (isStomping) return;
-
-            // Landing on top of the enemy — let the stomp trigger handle it
-            ContactPoint2D contact = collision.GetContact(0);
-            if (contact.normal.y > 0.5f) return;
-
-            if (TryGetComponent<PlayerHealth>(out PlayerHealth ph))
-                ph.TakeEnemyDamage(1);
+            ContactPoint2D c = contactBuffer[i];
+            if (c.normal.y > 0.5f) return;
+            if (landingFromAbove && c.point.y > enemyCenterY) return;
         }
 
+        if (TryGetComponent<PlayerHealth>(out PlayerHealth ph))
+            ph.TakeEnemyDamage(1);
     }
 
     // ── Misc helpers ─────────────────────────────────────────────────────────
@@ -342,7 +356,7 @@ public class PlayerController : MonoBehaviour
     private IEnumerator IgnoreCollisionRoutine(Collider2D enemyCollider)
     {
         Physics2D.IgnoreCollision(GetComponent<Collider2D>(), enemyCollider, true);
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(stompIgnoreDuration);
         if (enemyCollider != null)
             Physics2D.IgnoreCollision(GetComponent<Collider2D>(), enemyCollider, false);
     }

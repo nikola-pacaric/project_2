@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(ls *.html)",
-      "Bash(ls Arc2*.html)"
+      "Bash(ls Arc2*.html)",
+      "Bash(git add:*)"
     ]
   }
 }
