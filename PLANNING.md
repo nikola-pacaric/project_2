@@ -20,8 +20,8 @@
 ## Arc_2 — Main Arc
 
 ### Surface (on the ground)
-- [ ] Level design — surface deo
-- [ ] Enemy AI: snake, lizard, opossum
+- [x] Level design — surface deo
+- [x] Enemy AI: snake, lizard, opossum
 - [ ] Score / diamond counter UI
 
 ### Underground tunnel
