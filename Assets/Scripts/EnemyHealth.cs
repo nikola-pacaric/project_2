@@ -5,6 +5,7 @@ public class EnemyHealth : MonoBehaviour
 {
     public int maxHealth = 3;
     [SerializeField] private int currentHealth;
+    [SerializeField] private int scoreValue = 50;
 
     [Header("Visual Effects")]
     public GameObject deathAnimationPrefab;
@@ -48,6 +49,7 @@ public class EnemyHealth : MonoBehaviour
         {
             Instantiate(deathAnimationPrefab, transform.position, Quaternion.identity);
         }
+        GameManager.Instance.AddScore(scoreValue);
         Destroy(gameObject);
     }
 }

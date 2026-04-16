@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class PlayerHealth : MonoBehaviour
 {
+    public static event System.Action OnHealthChanged;
 
     public int maxHearts = 3;
     public int segmentsPerHeart = 4;
@@ -28,13 +29,15 @@ public class PlayerHealth : MonoBehaviour
 
         sprite = GetComponent<SpriteRenderer>();
         originalColor = sprite.color;
+
+        OnHealthChanged?.Invoke();
     }
 
     public void GainHeart()
     {
         maxHearts++;
         currentSegment = maxHearts * segmentsPerHeart;
-        FindAnyObjectByType<HeartsUI>().AddHeart();
+        OnHealthChanged?.Invoke();
     }
 
     public void RespawnAfterFall()
@@ -52,6 +55,8 @@ public class PlayerHealth : MonoBehaviour
         currentSegment = Mathf.Max(currentSegment, 0);
 
         transform.position = respawnPoint;
+        OnHealthChanged?.Invoke();
+
         if(currentSegment <= 0)
         {
             GameOver();
@@ -64,6 +69,7 @@ public class PlayerHealth : MonoBehaviour
         currentSegment = Mathf.Max (currentSegment, 0);
 
         transform.position = respawnPoint;
+        OnHealthChanged?.Invoke();
 
         if(currentSegment <= 0)
         {
@@ -77,6 +83,7 @@ public class PlayerHealth : MonoBehaviour
 
         currentSegment -= segmentsLost;
         currentSegment = Mathf.Max(currentSegment, 0);
+        OnHealthChanged?.Invoke();
 
         StartCoroutine(FlashRed());
 
@@ -98,6 +105,7 @@ public class PlayerHealth : MonoBehaviour
 
         currentSegment -= segmentsLost;
         currentSegment = Mathf.Max(currentSegment, 0);
+        OnHealthChanged?.Invoke();
 
         StartCoroutine(FlashRed());
 
@@ -152,23 +160,14 @@ public class PlayerHealth : MonoBehaviour
     public void Heal(int segmentsGained)
     {
         currentSegment = Mathf.Min(currentSegment + segmentsGained, maxHearts * segmentsPerHeart);
+        OnHealthChanged?.Invoke();
     }
 
     public void RestoreState(int restoredMaxHearts, int restoredCurrentSegment)
     {
-        HeartsUI ui = FindAnyObjectByType<HeartsUI>();
-        int heartsToAdd = restoredMaxHearts - maxHearts;
-
         maxHearts = restoredMaxHearts;
         currentSegment = Mathf.Clamp(restoredCurrentSegment, 0, maxHearts * segmentsPerHeart);
-
-        if (ui != null)
-        {
-            for (int i = 0; i < heartsToAdd; i++)
-            {
-                ui.AddHeart();
-            }
-        }
+        OnHealthChanged?.Invoke();
     }
 
     private void GameOver()
@@ -176,10 +175,5 @@ public class PlayerHealth : MonoBehaviour
         transform.position = startingPossPoint;
         Debug.Log("Game Over! Restart required.");
         //Load main menu or restart Arc_1 scene
-    }
-
-    void Update()
-    {
-        
     }
 }

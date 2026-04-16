@@ -1,5 +1,3 @@
-using NUnit.Framework;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,35 +14,37 @@ public class HeartsUI : MonoBehaviour
     public Sprite quarterHeart;
     public Sprite emptyHeart;
 
-    private System.Collections.Generic.List<Image> hearts = new List<Image>();
+    private List<Image> hearts = new List<Image>();
 
-    void Start()
+    void OnEnable()
     {
-        for (int i = 0; i < playerHealth.maxHearts; i++)
-        {
-            AddHeartPrefab();
-        }
+        PlayerHealth.OnHealthChanged += UpdateHearts;
     }
 
-    // Update is called once per frame
-    void Update()
+    void OnDisable()
+    {
+        PlayerHealth.OnHealthChanged -= UpdateHearts;
+    }
+
+    void Start()
     {
         UpdateHearts();
     }
 
-    void AddHeartPrefab()
+    private void AddHeartPrefab()
     {
         GameObject heartObj = Instantiate(heartPrefab, heartsPanel);
         Image heartImage = heartObj.GetComponent<Image>();
         hearts.Add(heartImage);
     }
 
-    public void AddHeart()
-    {
-        AddHeartPrefab();
-    }
     private void UpdateHearts()
     {
+        while (hearts.Count < playerHealth.maxHearts)
+        {
+            AddHeartPrefab();
+        }
+
         int segmentsPerHeart = playerHealth.segmentsPerHeart;
 
         for (int i = 0; i < hearts.Count; i++)
@@ -62,6 +62,5 @@ public class HeartsUI : MonoBehaviour
                 default: hearts[i].sprite = emptyHeart; break;
             }
         }
-
     }
 }

@@ -6,6 +6,10 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
+    public static event System.Action<int> OnScoreChanged;
+
+    public int Score { get; private set; }
+
     private int savedCurrentSegment;
     private int savedMaxHearts;
     private string targetSpawnPointId;
@@ -37,6 +41,18 @@ public class GameManager : MonoBehaviour
         {
             SceneManager.sceneLoaded -= OnSceneLoaded;
         }
+    }
+
+    public void AddScore(int points)
+    {
+        Score += points;
+        OnScoreChanged?.Invoke(Score);
+    }
+
+    public void ResetScore()
+    {
+        Score = 0;
+        OnScoreChanged?.Invoke(Score);
     }
 
     public void SavePlayerState(PlayerHealth player, string spawnPointId)
