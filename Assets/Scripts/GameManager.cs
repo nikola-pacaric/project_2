@@ -55,6 +55,14 @@ public class GameManager : MonoBehaviour
         OnScoreChanged?.Invoke(Score);
     }
 
+    public void ClearSavedState()
+    {
+        savedCurrentSegment = 0;
+        savedMaxHearts = 0;
+        targetSpawnPointId = null;
+        hasSavedState = false;
+    }
+
     public void SavePlayerState(PlayerHealth player, string spawnPointId)
     {
         savedCurrentSegment = player.currentSegment;
@@ -81,7 +89,6 @@ public class GameManager : MonoBehaviour
             {
                 player.transform.position = spawn.transform.position;
                 player.respawnPoint = spawn.transform.position;
-                player.startingPossPoint = spawn.transform.position;
             }
 
             player.RestoreState(savedMaxHearts, savedCurrentSegment);

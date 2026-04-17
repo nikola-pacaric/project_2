@@ -9,23 +9,27 @@ public class PlayerHealth : MonoBehaviour
     public int segmentsPerHeart = 4;
     public int currentSegment;
 
-    public Vector2 startingPossPoint;
     public Vector2 respawnPoint;
 
     [Header("Damage Effects")]
     [SerializeField] private float invincibilityDuration = 0.8f;
     [SerializeField] private float spikeBounceForce = 9f;
     [SerializeField] private float spikeHorizontalForce = 5f;
+
+    [Header("Game Over")]
+    [SerializeField] private GameOverUI gameOverUI;
+    [SerializeField] private float gameOverDelay = 1.5f;
+
     private SpriteRenderer sprite;
     private Color originalColor;
     private bool isInvincible;
+    private bool isDead;
 
 
     void Start()
     {
         currentSegment = maxHearts * segmentsPerHeart;
         respawnPoint = transform.position;
-        startingPossPoint = transform.position;
 
         sprite = GetComponent<SpriteRenderer>();
         originalColor = sprite.color;
@@ -172,8 +176,18 @@ public class PlayerHealth : MonoBehaviour
 
     private void GameOver()
     {
-        transform.position = startingPossPoint;
-        Debug.Log("Game Over! Restart required.");
-        //Load main menu or restart Arc_1 scene
+        if (isDead) return;
+        isDead = true;
+        StartCoroutine(GameOverSequence());
+    }
+
+    private IEnumerator GameOverSequence()
+    {
+        yield return new WaitForSeconds(gameOverDelay);
+
+        if (gameOverUI != null && GameManager.Instance != null)
+        {
+            gameOverUI.Show(GameManager.Instance.Score);
+        }
     }
 }

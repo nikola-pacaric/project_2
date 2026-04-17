@@ -243,6 +243,7 @@ MonoBehaviour:
   boxPushSpeed: 3
   boxPushCastDistance: 0.12
   minPushInput: 0.1
+  stompIgnoreDuration: 0.2
   isGrounded: 0
   velocity: 0
 --- !u!114 &8350394079573130725
@@ -257,14 +258,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85c967a4a5d51e045a5e8ded01344d39, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
-  maxHearts: 2
+  maxHearts: 1
   segmentsPerHeart: 4
   currentSegment: 0
-  startingPossPoint: {x: 0, y: 0}
   respawnPoint: {x: 0, y: 0}
   invincibilityDuration: 0.8
   spikeBounceForce: 18
   spikeHorizontalForce: 5
+  gameOverUI: {fileID: 0}
+  gameOverDelay: 1
 --- !u!114 &8718117472133729918
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -89,6 +89,7 @@
 - [ ] SFX: jump, attack, hit, death, pickup, checkpoint
 - [ ] Muzika: gameplay loop, boss tema
 - [ ] Menu sistem: Start Screen, Pause Menu, Game Over Screen
+- [ ] Leaderboard — MongoDB backend za runs + sessions (cross-player, ne PlayerPrefs); hook point pored `GameOverUI.Show()` na Game Over; `GameManager.Score` već feeduje ovo
 - [ ] WebGL build + GitHub Pages deploy
 
 ---

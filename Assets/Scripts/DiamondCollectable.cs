@@ -4,6 +4,7 @@ public class DiamondCollectable : MonoBehaviour
 {
 
     public int lifeValue = 1;
+    [SerializeField] private int scoreValue = 200;
     private Animator animator;
 
     private void Awake()
@@ -19,6 +20,11 @@ public class DiamondCollectable : MonoBehaviour
             if (playerHealth != null)
             {
                 playerHealth.GainHeart();
+            }
+
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.AddScore(scoreValue);
             }
 
             animator.SetTrigger("Collected");

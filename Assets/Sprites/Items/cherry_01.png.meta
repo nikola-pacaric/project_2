@@ -1,22 +1,22 @@
 fileFormatVersion: 2
-guid: d8251bb2dc753574b9926dcf2621fdaf
+guid: 78b862d8f0bc84e439b771a7d130eea6
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -90375647409325229
-    second: cherry_0
+      213: 3562712000347147855
+    second: cherry_01_0
   - first:
-      213: -8401610525154545504
-    second: cherry_1
+      213: 6686434871371749512
+    second: cherry_01_1
   - first:
-      213: -845279248070206384
-    second: cherry_2
+      213: -1342136025687070981
+    second: cherry_01_2
   - first:
-      213: -7956424436455985191
-    second: cherry_3
+      213: -3324537886501005017
+    second: cherry_01_3
   - first:
-      213: -1379442073510257210
-    second: cherry_4
+      213: 2763425297122011714
+    second: cherry_01_4
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -125,7 +125,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: cherry_0
+      name: cherry_01_0
       rect:
         serializedVersion: 2
         x: 0
@@ -140,14 +140,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 35b32d7d3dbeebef0800000000000000
-      internalID: -90375647409325229
+      spriteID: f4e86b130bb417130800000000000000
+      internalID: 3562712000347147855
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: cherry_1
+      name: cherry_01_1
       rect:
         serializedVersion: 2
         x: 21
@@ -162,14 +162,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0a0faf2bdbb776b80800000000000000
-      internalID: -8401610525154545504
+      spriteID: 888d5e9d61dfacc50800000000000000
+      internalID: 6686434871371749512
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: cherry_2
+      name: cherry_01_2
       rect:
         serializedVersion: 2
         x: 42
@@ -184,14 +184,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 05c14ca9007f444f0800000000000000
-      internalID: -845279248070206384
+      spriteID: bf6eaa44566cf5de0800000000000000
+      internalID: -1342136025687070981
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: cherry_3
+      name: cherry_01_3
       rect:
         serializedVersion: 2
         x: 63
@@ -206,14 +206,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9dfadc6412a159190800000000000000
-      internalID: -7956424436455985191
+      spriteID: 72997c8086edcd1d0800000000000000
+      internalID: -3324537886501005017
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: cherry_4
+      name: cherry_01_4
       rect:
         serializedVersion: 2
         x: 84
@@ -228,8 +228,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 6cd51342ebc3bdce0800000000000000
-      internalID: -1379442073510257210
+      spriteID: 24a294e9aa8a95620800000000000000
+      internalID: 2763425297122011714
       vertices: []
       indices: 
       edges: []
@@ -238,7 +238,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 7612310d2c75cdf4183b7f62e7b02e52
+    spriteID: df11f081136a4e641af6c651db7b092d
     internalID: 0
     vertices: []
     indices: 
@@ -250,11 +250,11 @@ TextureImporter:
       - key: SpriteEditor.SliceSettings
         value: '{"sliceOnImport":false,"gridCellCount":{"x":5.0,"y":1.0},"gridSpriteSize":{"x":21.0,"y":21.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":2,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      cherry_0: -90375647409325229
-      cherry_1: -8401610525154545504
-      cherry_2: -845279248070206384
-      cherry_3: -7956424436455985191
-      cherry_4: -1379442073510257210
+      cherry_01_0: 3562712000347147855
+      cherry_01_1: 6686434871371749512
+      cherry_01_2: -1342136025687070981
+      cherry_01_3: -3324537886501005017
+      cherry_01_4: 2763425297122011714
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
