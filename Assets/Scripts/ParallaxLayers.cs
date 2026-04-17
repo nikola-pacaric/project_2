@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[DefaultExecutionOrder(10000)]
 public class ParallaxLayers : MonoBehaviour
 {
     [SerializeField] private Transform cameraTransform;

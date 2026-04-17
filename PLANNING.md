@@ -22,7 +22,7 @@
 ### Surface (on the ground)
 - [x] Level design — surface deo
 - [x] Enemy AI: snake, lizard, opossum
-- [ ] Score / diamond counter UI
+- [x] Score / diamond counter UI
 
 ### Underground tunnel
 - [ ] Level design — underground deo

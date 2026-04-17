@@ -258,7 +258,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85c967a4a5d51e045a5e8ded01344d39, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
-  maxHearts: 1
+  maxHearts: 2
   segmentsPerHeart: 4
   currentSegment: 0
   respawnPoint: {x: 0, y: 0}
