@@ -167,7 +167,7 @@ MonoBehaviour:
   tauntDuration: 1
   groundLayer:
     serializedVersion: 2
-    m_Bits: 136
+    m_Bits: 128
   groundCheck: {fileID: 1020233824532650519}
   groundCheckRadius: 0.1
   destGroundCheckDepth: 1.5
@@ -197,6 +197,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
   maxHealth: 3
   currentHealth: 0
+  scoreValue: 50
   deathAnimationPrefab: {fileID: 2909153326865099594, guid: 42ed730af960d4e43a2107a636a68281, type: 3}
 --- !u!60 &6582203987390481652
 PolygonCollider2D:

@@ -105,10 +105,13 @@ public class PlayerController : MonoBehaviour
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundRadius, groundLayer);
 
         if (isGrounded && !wasGrounded)
-        {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
+
+        // Clear jumpConsumed whenever we're on the ground and not rising.
+        // Covers the normal landing case AND the "jump blocked by low ceiling"
+        // case where the player never actually leaves the ground.
+        if (isGrounded && rb.linearVelocity.y <= 0.1f)
             jumpConsumed = false;
-        }
 
         wasGrounded = isGrounded;
 
