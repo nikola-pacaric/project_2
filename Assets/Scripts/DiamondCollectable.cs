@@ -27,6 +27,7 @@ public class DiamondCollectable : MonoBehaviour
                 GameManager.Instance.AddScore(scoreValue);
             }
 
+            AudioManager.Instance?.PlaySFX(SfxId.DiamondPickup);
             animator.SetTrigger("Collected");
             GetComponent<Collider2D>().enabled = false;
         }

@@ -46,25 +46,43 @@
 
 **Pristup:** wire system first sa placeholder ID-jevima, import audio files-ova kasnije. Gameplay code zove po ID-u — kad fajlovi stignu samo popunimo Inspector slotove, bez izmene koda.
 
-- [ ] `AudioManager.cs` singleton u `Scripts/Audio/` (DontDestroyOnLoad)
-- [ ] `SoundLibrary.cs` ScriptableObject — mapa `SfxId` enum → `AudioClip`, i `MusicId` enum → `AudioClip`
-- [ ] Definisati enume: `SfxId { Jump, Attack, Hit, Death, Pickup, Checkpoint }`, `MusicId { Gameplay }`
-- [ ] AudioMixer asset sa grupama: Music, SFX, UI
-- [ ] API:
+- [x] `AudioManager.cs` singleton u `Scripts/Audio/` (DontDestroyOnLoad)
+- [x] `SoundLibrary.cs` ScriptableObject — mapa `SfxId` enum → `AudioClip`, i `MusicId` enum → `AudioClip`
+- [x] Definisati enume:
+  - `SfxId { Jump, Slash, Stomp, Hit, PlayerDeath, DiamondPickup, CherryPickup, Checkpoint, EnemyFrogJump, EnemyFrogTaunt, EnemyMushroomGas, EnemyEagleAttack, EnemyDeath }`
+  - `MusicId { Gameplay }`
+- [x] AudioMixer asset (`MainMixer.mixer`) sa grupama: Music, SFX, UI + exposed params `MusicVolume`, `SfxVolume`, `UiVolume`
+- [x] API:
   - `AudioManager.Instance.PlaySFX(SfxId id)`
   - `AudioManager.Instance.PlayMusic(MusicId id)`
   - `AudioManager.Instance.StopMusic()`
-  - `AudioManager.Instance.SetVolume(MixerGroup group, float 0–1)`
-- [ ] SFX pool (nekoliko AudioSource-a za preklapanje zvukova) umesto jednog source-a
-- [ ] Null-safe: ako clip nije upisan u SoundLibrary, log warning ali ne baca exception (omogućava rad sa praznim slotovima)
+  - `AudioManager.Instance.SetVolume(AudioChannel channel, float 0–1)`
+- [x] SFX pool (nekoliko AudioSource-a za preklapanje zvukova) umesto jednog source-a
+- [x] Null-safe: ako clip nije upisan u SoundLibrary, log warning ali ne baca exception (omogućava rad sa praznim slotovima)
+- [x] `MainSoundLibrary` asset popunjen sa svih 13 SFX entries + 1 Music entry
+- [x] `AudioManager` kao prefab instanciran u `Arc_1.unity` i `Arc_2.unity` (Library, Mixer, 3 grupe wired up)
+- [x] On-screen gate — `PlaySFXAt(id, worldPos)` varijanta, enemy sounds gate-ovani kroz `Camera.main.WorldToViewportPoint`. Van ekrana → tišina.
 
-### 2. SFX hookup (placeholder ID-jevi — clipovi se ubacuju u SoundLibrary kasnije)
-- [ ] jump — u `PlayerController` kad se pozove skok
-- [ ] attack — u fire slash metodu
-- [ ] hit — kad igrač primi damage (HealthSystem)
-- [ ] death — kad igrač umre
-- [ ] pickup — diamond, cherry, Gem_Life (svi isti SFX ili jedan shared pickup)
-- [ ] checkpoint — Bonfire aktivacija
+### 2. SFX hookup — completed
+
+**Player (always audible)**
+- [x] `SfxId.Jump` — `PlayerController` (normal jump + ladder jump)
+- [x] `SfxId.Slash` — `PlayerCombat.MeleeAttack`
+- [x] `SfxId.Stomp` — `PlayerController.OnTriggerEnter2D` (stomp trigger)
+- [x] `SfxId.Hit` — `PlayerHealth.TakeEnemyDamage` + `TakeSpikeDamage`
+- [x] `SfxId.PlayerDeath` — `PlayerHealth.GameOver`
+
+**Pickups (always audible — player-triggered)**
+- [x] `SfxId.DiamondPickup` — `DiamondCollectable` (Gem_Life je isti objekat = DiamondCollectable)
+- [x] `SfxId.CherryPickup` — `CherryCollectable`
+- [x] `SfxId.Checkpoint` — `Checkpoint` (guard: fires jednom per bonfire, ne na svakom walk-through)
+
+**Enemies (on-screen gated via `PlaySFXAt`)**
+- [x] `SfxId.EnemyFrogJump` — `EnemyFrogAI.JumpSequence`
+- [x] `SfxId.EnemyFrogTaunt` — `EnemyFrogAI.TauntSequence`
+- [x] `SfxId.EnemyMushroomGas` — `EnemyMushroomAI.FireGas`
+- [x] `SfxId.EnemyEagleAttack` — `EnemyEagleAI.AttackSequence` (spotted telegraph)
+- [x] `SfxId.EnemyDeath` — `EnemyHealth.Die` (shared svi enemies)
 
 ### 3. Muzika
 - [ ] Gameplay loop — ground level tema (trigger na Start Screen → gameplay scene transition)

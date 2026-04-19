@@ -49,6 +49,7 @@ public class EnemyHealth : MonoBehaviour
         {
             Instantiate(deathAnimationPrefab, transform.position, Quaternion.identity);
         }
+        AudioManager.Instance?.PlaySFXAt(SfxId.EnemyDeath, transform.position);
         GameManager.Instance.AddScore(scoreValue);
         Destroy(gameObject);
     }

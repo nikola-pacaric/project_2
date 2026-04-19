@@ -89,6 +89,7 @@ public class PlayerHealth : MonoBehaviour
         currentSegment = Mathf.Max(currentSegment, 0);
         OnHealthChanged?.Invoke();
 
+        AudioManager.Instance?.PlaySFX(SfxId.Hit);
         StartCoroutine(FlashRed());
 
         Animator anim = GetComponent<Animator>();
@@ -111,6 +112,7 @@ public class PlayerHealth : MonoBehaviour
         currentSegment = Mathf.Max(currentSegment, 0);
         OnHealthChanged?.Invoke();
 
+        AudioManager.Instance?.PlaySFX(SfxId.Hit);
         StartCoroutine(FlashRed());
 
         GetComponent<Animator>().SetTrigger("isHurt");
@@ -178,6 +180,7 @@ public class PlayerHealth : MonoBehaviour
     {
         if (isDead) return;
         isDead = true;
+        AudioManager.Instance?.PlaySFX(SfxId.PlayerDeath);
         StartCoroutine(GameOverSequence());
     }
 

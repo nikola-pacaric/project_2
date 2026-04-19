@@ -81,6 +81,7 @@ public class EnemyFrogAI : MonoBehaviour
         float direction = (targetX > transform.position.x) ? 1 : -1;
         rb.linearVelocity = new Vector2(direction * jumpForward, jumpHeight);
         anim.SetTrigger("frog_jumps");
+        AudioManager.Instance?.PlaySFXAt(SfxId.EnemyFrogJump, transform.position);
 
         yield return new WaitForSeconds(0.1f);
 
@@ -109,6 +110,7 @@ public class EnemyFrogAI : MonoBehaviour
         rb.linearVelocity = Vector2.zero;
 
         anim.SetBool("isTaunting", true);
+        AudioManager.Instance?.PlaySFXAt(SfxId.EnemyFrogTaunt, transform.position);
         yield return new WaitForSeconds(tauntDuration);
         anim.SetBool("isTaunting", false);
 

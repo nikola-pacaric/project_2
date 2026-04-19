@@ -49,6 +49,8 @@ public class PlayerCombat : MonoBehaviour
             if (TryGetComponent<PlayerController>(out PlayerController pc))
                 pc.LockFacing(attackCooldown);
 
+            AudioManager.Instance?.PlaySFX(SfxId.Slash);
+
             Destroy(instance, attackCooldown);
         }
 

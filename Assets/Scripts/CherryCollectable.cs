@@ -40,6 +40,8 @@ public class CherryCollectable : MonoBehaviour
             GameManager.Instance.AddScore(scoreValue);
         }
 
+        AudioManager.Instance?.PlaySFX(SfxId.CherryPickup);
+
         if (animator != null)
         {
             animator.SetTrigger("Collected");

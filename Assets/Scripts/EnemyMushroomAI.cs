@@ -119,6 +119,7 @@ public class EnemyMushroomAI : MonoBehaviour
         if (gasCloudPrefab == null || mouthPoint == null) return;
 
         GameObject gas = Instantiate(gasCloudPrefab, mouthPoint.position, Quaternion.identity);
+        AudioManager.Instance?.PlaySFXAt(SfxId.EnemyMushroomGas, transform.position);
 
         if (TryGetComponent<Collider2D>(out Collider2D myCol) &&
             gas.TryGetComponent<Collider2D>(out Collider2D gasCol))

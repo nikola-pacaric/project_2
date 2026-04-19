@@ -60,6 +60,21 @@ public class AudioManager : MonoBehaviour
         source.Play();
     }
 
+    public void PlaySFXAt(SfxId id, Vector3 worldPosition)
+    {
+        if (!IsOnScreen(worldPosition)) return;
+        PlaySFX(id);
+    }
+
+    private bool IsOnScreen(Vector3 worldPosition)
+    {
+        Camera cam = Camera.main;
+        if (cam == null) return true;
+
+        Vector3 vp = cam.WorldToViewportPoint(worldPosition);
+        return vp.z > 0f && vp.x >= 0f && vp.x <= 1f && vp.y >= 0f && vp.y <= 1f;
+    }
+
     public void PlayMusic(MusicId id)
     {
         if (library == null)

@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class Checkpoint : MonoBehaviour
 {
+    private bool activated;
+
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
@@ -11,6 +13,12 @@ public class Checkpoint : MonoBehaviour
             {
                 ph.respawnPoint = transform.position;
                 Debug.Log("Checkpoint activated at " + transform.position);
+
+                if (!activated)
+                {
+                    activated = true;
+                    AudioManager.Instance?.PlaySFX(SfxId.Checkpoint);
+                }
             }
         }
     }

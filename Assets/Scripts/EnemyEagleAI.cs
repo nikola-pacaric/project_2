@@ -82,6 +82,7 @@ public class EnemyEagleAI : MonoBehaviour
         float faceDir = playerTransform.position.x >= transform.position.x ? 1f : -1f;
         transform.localScale = new Vector3(-faceDir, 1f, 1f);
         anim.SetBool("isDiving", true);
+        AudioManager.Instance?.PlaySFXAt(SfxId.EnemyEagleAttack, transform.position);
 
         yield return new WaitForSeconds(spottedPause);
 
