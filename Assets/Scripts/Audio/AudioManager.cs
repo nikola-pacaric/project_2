@@ -14,6 +14,7 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioMixerGroup musicGroup;
     [SerializeField] private AudioMixerGroup sfxGroup;
     [SerializeField] private AudioMixerGroup uiGroup;
+    [SerializeField] private string masterVolumeParam = "MasterVolume";
     [SerializeField] private string musicVolumeParam = "MusicVolume";
     [SerializeField] private string sfxVolumeParam = "SfxVolume";
     [SerializeField] private string uiVolumeParam = "UiVolume";
@@ -26,6 +27,8 @@ public class AudioManager : MonoBehaviour
 
     private const float MIN_VOLUME_DB = -80f;
     private const float SILENCE_THRESHOLD = 0.0001f;
+    private const float DEFAULT_VOLUME = 0.75f;
+    private const string PREFS_PREFIX = "audio.volume.";
 
     private void Awake()
     {
@@ -39,6 +42,16 @@ public class AudioManager : MonoBehaviour
 
         BuildMusicSource();
         BuildSfxPool();
+    }
+
+    private void Start()
+    {
+        ApplySavedVolumes();
+    }
+
+    public float GetVolume(AudioChannel channel)
+    {
+        return PlayerPrefs.GetFloat(PREFS_PREFIX + channel, DEFAULT_VOLUME);
     }
 
     public void PlaySFX(SfxId id)
@@ -110,6 +123,7 @@ public class AudioManager : MonoBehaviour
 
         string param = channel switch
         {
+            AudioChannel.Master => masterVolumeParam,
             AudioChannel.Music => musicVolumeParam,
             AudioChannel.Sfx => sfxVolumeParam,
             AudioChannel.Ui => uiVolumeParam,
@@ -120,6 +134,16 @@ public class AudioManager : MonoBehaviour
         float clamped = Mathf.Clamp01(normalized);
         float db = clamped <= SILENCE_THRESHOLD ? MIN_VOLUME_DB : Mathf.Log10(clamped) * 20f;
         mixer.SetFloat(param, db);
+        PlayerPrefs.SetFloat(PREFS_PREFIX + channel, clamped);
+    }
+
+    private void ApplySavedVolumes()
+    {
+        if (mixer == null) return;
+        SetVolume(AudioChannel.Master, GetVolume(AudioChannel.Master));
+        SetVolume(AudioChannel.Music, GetVolume(AudioChannel.Music));
+        SetVolume(AudioChannel.Sfx, GetVolume(AudioChannel.Sfx));
+        SetVolume(AudioChannel.Ui, GetVolume(AudioChannel.Ui));
     }
 
     private void BuildMusicSource()

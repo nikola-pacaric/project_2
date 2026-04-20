@@ -14,45 +14,45 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SoundLibrary
   sfxEntries:
   - id: 0
-    clip: {fileID: 0}
-    volume: 1
+    clip: {fileID: 8300000, guid: 4e349dc959014a845b9aa317d1c2b7f0, type: 3}
+    volume: 0.2
   - id: 1
-    clip: {fileID: 0}
-    volume: 1
+    clip: {fileID: 8300000, guid: 323e15cfe809e114ab92c9f4b25e8bc2, type: 3}
+    volume: 0.4
   - id: 2
-    clip: {fileID: 0}
-    volume: 1
+    clip: {fileID: 8300000, guid: 2352822feb4caa14ebdbc0c713289f8d, type: 3}
+    volume: 0.4
   - id: 3
-    clip: {fileID: 0}
-    volume: 1
+    clip: {fileID: 8300000, guid: 8b23b175a78d6b5458322e3a6c9905d0, type: 3}
+    volume: 0.4
   - id: 4
-    clip: {fileID: 0}
-    volume: 1
+    clip: {fileID: 8300000, guid: 1ed8fb76fc64e4e46847348138782234, type: 3}
+    volume: 0.4
   - id: 5
-    clip: {fileID: 0}
-    volume: 1
+    clip: {fileID: 8300000, guid: cfce0cea076109f478783201b2a9f57f, type: 3}
+    volume: 0.5
   - id: 6
-    clip: {fileID: 0}
-    volume: 1
+    clip: {fileID: 8300000, guid: 35cf7766e9e2aa542811e896fde57989, type: 3}
+    volume: 0.3
   - id: 7
-    clip: {fileID: 0}
-    volume: 1
+    clip: {fileID: 8300000, guid: a652877b012108e41871f867ada9f176, type: 3}
+    volume: 0.5
   - id: 8
-    clip: {fileID: 0}
-    volume: 1
+    clip: {fileID: 8300000, guid: 60f9efe3d97bc8f47bea1af7f7093d41, type: 3}
+    volume: 0.1
   - id: 9
-    clip: {fileID: 0}
-    volume: 1
+    clip: {fileID: 8300000, guid: fc125319261885d458945c4dcb1dcf38, type: 3}
+    volume: 0.1
   - id: 10
-    clip: {fileID: 0}
-    volume: 1
+    clip: {fileID: 8300000, guid: 83829ff414f47a048b5387e4ab33571c, type: 3}
+    volume: 0.5
   - id: 11
-    clip: {fileID: 0}
-    volume: 1
+    clip: {fileID: 8300000, guid: 2e530661c1a424541bdb9e354c3d4cda, type: 3}
+    volume: 0.5
   - id: 12
-    clip: {fileID: 0}
-    volume: 1
+    clip: {fileID: 8300000, guid: 7ab1a921a0534f049816db85a68397c4, type: 3}
+    volume: 0.2
   musicEntries:
   - id: 0
-    clip: {fileID: 0}
-    volume: 1
+    clip: {fileID: 8300000, guid: 7812c0ff41dd0ae40a10fd6f14807e74, type: 3}
+    volume: 0.03

@@ -86,7 +86,6 @@
 
 ### 3. Muzika
 - [ ] Gameplay loop — ground level tema (trigger na Start Screen → gameplay scene transition)
-- [ ] (Boss tema → DLC 3)
 
 ### 4. Menu sistem
 - [ ] **Start Screen (scene)** — 2 dugmeta: **Play** i **Leaderboard**

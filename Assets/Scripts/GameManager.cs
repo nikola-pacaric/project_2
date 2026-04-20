@@ -63,6 +63,13 @@ public class GameManager : MonoBehaviour
         hasSavedState = false;
     }
 
+    public void ResetRun()
+    {
+        ResetScore();
+        ClearSavedState();
+        if (RunTimer.Instance != null) RunTimer.Instance.StartRun();
+    }
+
     public void SavePlayerState(PlayerHealth player, string spawnPointId)
     {
         savedCurrentSegment = player.currentSegment;
