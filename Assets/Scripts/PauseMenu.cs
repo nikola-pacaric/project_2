@@ -7,6 +7,7 @@ public class PauseMenu : MonoBehaviour
 {
     [Header("Panel")]
     [SerializeField] private GameObject panel;
+    [SerializeField] private GameObject gameOverPanel;
 
     [Header("Buttons")]
     [SerializeField] private Button resumeButton;
@@ -36,6 +37,7 @@ public class PauseMenu : MonoBehaviour
 
     private void Toggle()
     {
+        if (gameOverPanel != null && gameOverPanel.activeSelf) return;
         if (isPaused) Resume();
         else Pause();
     }

@@ -2369,7 +2369,7 @@ PrefabInstance:
     - target: {fileID: 8350394079573130725, guid: 24e52096ed26e90479e5557b14cd2d0a, type: 3}
       propertyPath: gameOverUI
       value: 
-      objectReference: {fileID: 502297950564843447}
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2476,17 +2476,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d109f70390530764a9eb52adc5c1e83e, type: 3}
---- !u!114 &502297950564843447 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5928887845704546435, guid: d109f70390530764a9eb52adc5c1e83e, type: 3}
-  m_PrefabInstance: {fileID: 502297950564843443}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: caba7fe09d02eb04fa61027811b4048a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GameOverUI
 --- !u!483693784 &1040073291245722861
 TilemapRenderer:
   serializedVersion: 2
