@@ -10,6 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 4574172325703803744}
   - component: {fileID: 2744912089719031851}
+  - component: {fileID: 103882904002352418}
+  - component: {fileID: 2773918529497325142}
   m_Layer: 0
   m_Name: AudioManager
   m_TagString: Untagged
@@ -49,7 +51,36 @@ MonoBehaviour:
   musicGroup: {fileID: -1131196422765132200, guid: 20aaf31f49c3f6f48926f68635f6bce5, type: 2}
   sfxGroup: {fileID: -5832842418168703819, guid: 20aaf31f49c3f6f48926f68635f6bce5, type: 2}
   uiGroup: {fileID: 7244171298194420143, guid: 20aaf31f49c3f6f48926f68635f6bce5, type: 2}
+  masterVolumeParam: MasterVolume
   musicVolumeParam: MusicVolume
   sfxVolumeParam: SfxVolume
   uiVolumeParam: UiVolume
   sfxVoiceCount: 8
+--- !u!114 &103882904002352418
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 850451006222414232}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ff0f89e84331fe44b773c849c982c24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SceneMusicPlayer
+  track: 0
+  playOnStart: 1
+--- !u!114 &2773918529497325142
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 850451006222414232}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ff0f89e84331fe44b773c849c982c24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SceneMusicPlayer
+  track: 0
+  playOnStart: 1

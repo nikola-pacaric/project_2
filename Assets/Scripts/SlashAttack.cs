@@ -2,10 +2,10 @@ using UnityEngine;
 
 public class SlashAttack : MonoBehaviour
 {
-    public PlayerCombat playerCombar;
+    public PlayerCombat playerCombat;
 
     public void DealDamage()
     {
-        playerCombar.ApplyDamage(transform.position);
+        playerCombat.ApplyDamage(transform.position);
     }
 }

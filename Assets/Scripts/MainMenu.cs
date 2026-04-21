@@ -29,6 +29,7 @@ public class MainMenu : MonoBehaviour
 
         ShowMainPanel();
         Time.timeScale = 1f;
+        AudioManager.Instance?.StopMusic();
     }
 
     private void Play()

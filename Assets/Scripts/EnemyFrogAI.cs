@@ -4,18 +4,18 @@ using System.Collections;
 public class EnemyFrogAI : MonoBehaviour
 {
     [Header("Jump Physics")]
-    public float jumpHeight = 5f;
-    public float jumpForward = 3f;
-    public float timeBetweenJumps = 1.0f;
+    [SerializeField] private float jumpHeight = 5f;
+    [SerializeField] private float jumpForward = 3f;
+    [SerializeField] private float timeBetweenJumps = 1.0f;
 
     [Header("Route Settings")]
-    public float patrolDistance = 5f;
-    public float tauntDuration = 1.5f;
+    [SerializeField] private float patrolDistance = 5f;
+    [SerializeField] private float tauntDuration = 1.5f;
 
     [Header("Detection")]
-    public LayerMask groundLayer;
-    public Transform groundCheck;
-    public float groundCheckRadius = 0.2f;
+    [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private Transform groundCheck;
+    [SerializeField] private float groundCheckRadius = 0.2f;
 
     [Header("Patrol Sensors")]
     [SerializeField] private float destGroundCheckDepth = 1.5f;

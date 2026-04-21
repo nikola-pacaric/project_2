@@ -850,25 +850,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ba9dfe6f1237ebe408be3280d069cd8c, type: 3}
---- !u!1 &735234632 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 850451006222414232, guid: a0b872308b2ebd542859a9e707e78bb9, type: 3}
-  m_PrefabInstance: {fileID: 1724607833}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &735234635
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 735234632}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8ff0f89e84331fe44b773c849c982c24, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SceneMusicPlayer
-  track: 0
-  playOnStart: 1
 --- !u!1001 &740523072
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1974,10 +1955,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 850451006222414232, guid: a0b872308b2ebd542859a9e707e78bb9, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 735234635}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a0b872308b2ebd542859a9e707e78bb9, type: 3}
 --- !u!1001 &1747306229
 PrefabInstance:
@@ -2369,6 +2347,10 @@ PrefabInstance:
     - target: {fileID: 8350394079573130725, guid: 24e52096ed26e90479e5557b14cd2d0a, type: 3}
       propertyPath: gameOverUI
       value: 
+      objectReference: {fileID: 502297950564843444}
+    - target: {fileID: 8350394079573130725, guid: 24e52096ed26e90479e5557b14cd2d0a, type: 3}
+      propertyPath: gameOverDelay
+      value: 0.75
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2476,6 +2458,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d109f70390530764a9eb52adc5c1e83e, type: 3}
+--- !u!114 &502297950564843444 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6562206567567140034, guid: d109f70390530764a9eb52adc5c1e83e, type: 3}
+  m_PrefabInstance: {fileID: 502297950564843443}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: caba7fe09d02eb04fa61027811b4048a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameOverUI
 --- !u!483693784 &1040073291245722861
 TilemapRenderer:
   serializedVersion: 2

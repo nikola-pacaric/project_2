@@ -170,11 +170,6 @@ public class EnemyEagleAI : MonoBehaviour
 
     }
 
-    public void TakeDamage(int amount)
-    {
-        // Handled by EnemyHealth — hook in here if you need per-hit reactions
-    }
-
     private void OnDrawGizmosSelected()
     {
         // Detection box

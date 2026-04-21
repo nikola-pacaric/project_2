@@ -12308,10 +12308,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 3501529387438370969, guid: d109f70390530764a9eb52adc5c1e83e, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 5584579675023341030, guid: d109f70390530764a9eb52adc5c1e83e, type: 3}
       propertyPath: playerHealth
       value: 
@@ -12323,7 +12319,7 @@ PrefabInstance:
   m_SourcePrefab: {fileID: 100100000, guid: d109f70390530764a9eb52adc5c1e83e, type: 3}
 --- !u!114 &502297950564843444 stripped
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5928887845704546435, guid: d109f70390530764a9eb52adc5c1e83e, type: 3}
+  m_CorrespondingSourceObject: {fileID: 6562206567567140034, guid: d109f70390530764a9eb52adc5c1e83e, type: 3}
   m_PrefabInstance: {fileID: 502297950564843443}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}

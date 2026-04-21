@@ -3,7 +3,6 @@ using UnityEngine;
 public class DiamondCollectable : MonoBehaviour
 {
 
-    public int lifeValue = 1;
     [SerializeField] private int scoreValue = 200;
     private Animator animator;
 
@@ -36,16 +35,5 @@ public class DiamondCollectable : MonoBehaviour
     public void DestroyDiamond()
     {
         Destroy(gameObject);
-    }
-
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }

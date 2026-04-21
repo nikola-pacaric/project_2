@@ -1,4 +1,5 @@
 public enum MusicId
 {
-    Gameplay
+    Gameplay,
+    MainMenu
 }

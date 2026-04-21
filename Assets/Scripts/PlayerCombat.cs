@@ -3,16 +3,16 @@ using UnityEngine;
 
 public class PlayerCombat : MonoBehaviour
 {
-    public int meleeDamage = 1;
-    public Transform attackPoint;
-    public GameObject fireSlashPrefab;
-    public float attackRangeX = 1f;
-    public float attackRangeY = 1f;
-    public LayerMask enemyLayers;
+    [SerializeField] private int meleeDamage = 1;
+    [SerializeField] private Transform attackPoint;
+    [SerializeField] private GameObject fireSlashPrefab;
+    [SerializeField] private float attackRangeX = 1f;
+    [SerializeField] private float attackRangeY = 1f;
+    [SerializeField] private LayerMask enemyLayers;
 
     private PlayerControls controls;
 
-    public float attackCooldown = 0.5f;
+    [SerializeField] private float attackCooldown = 0.5f;
     private bool canAttack = true;
 
 
@@ -40,7 +40,7 @@ public class PlayerCombat : MonoBehaviour
 
             SlashAttack sa = instance.GetComponent<SlashAttack>();
             if (sa != null)
-                sa.playerCombar = this;
+                sa.playerCombat = this;
 
             Animator instanceAnim = instance.GetComponent<Animator>();
             if (instanceAnim != null)
@@ -69,7 +69,6 @@ public class PlayerCombat : MonoBehaviour
                 eh.TakeDamage(meleeDamage);
             }
         }
-        Debug.Log("Melee fire slash!");
     }
 
     private IEnumerator AttackCooldownRoutine()

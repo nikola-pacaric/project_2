@@ -263,7 +263,6 @@ public class PlayerController : MonoBehaviour
         if (other.TryGetComponent<Climbable>(out _))
         {
             isOnLadder = true;
-            Debug.Log("[PlayerController] isOnLadder = true");
             return;
         }
 

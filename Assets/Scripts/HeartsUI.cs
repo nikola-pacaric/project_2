@@ -4,15 +4,15 @@ using UnityEngine.UI;
 
 public class HeartsUI : MonoBehaviour
 {
-    public PlayerHealth playerHealth;
-    public GameObject heartPrefab;
-    public Transform heartsPanel;
+    [SerializeField] private PlayerHealth playerHealth;
+    [SerializeField] private GameObject heartPrefab;
+    [SerializeField] private Transform heartsPanel;
 
-    public Sprite fullHeart;
-    public Sprite threeQuartersHeart;
-    public Sprite halfHeart;
-    public Sprite quarterHeart;
-    public Sprite emptyHeart;
+    [SerializeField] private Sprite fullHeart;
+    [SerializeField] private Sprite threeQuartersHeart;
+    [SerializeField] private Sprite halfHeart;
+    [SerializeField] private Sprite quarterHeart;
+    [SerializeField] private Sprite emptyHeart;
 
     private List<Image> hearts = new List<Image>();
 

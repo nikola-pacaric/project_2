@@ -12,7 +12,6 @@ public class Checkpoint : MonoBehaviour
             if (ph != null)
             {
                 ph.respawnPoint = transform.position;
-                Debug.Log("Checkpoint activated at " + transform.position);
 
                 if (!activated)
                 {

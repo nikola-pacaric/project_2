@@ -7,7 +7,7 @@ public class GasCloud : MonoBehaviour
     [SerializeField] private float moveSpeed = 4f;
     [SerializeField] private float spawnDuration = 0.4f;
     [SerializeField] private float travelDuration = 3f;
-    [SerializeField] private float disspiateDuration = 0.5f;
+    [SerializeField] private float dissipateDuration = 0.5f;
 
     [Header("Damage")]
     [SerializeField] private int damage = 1;
@@ -70,6 +70,6 @@ public class GasCloud : MonoBehaviour
         isMoving = false;
         StopAllCoroutines();
         anim.SetTrigger("Hit");
-        Destroy(gameObject, disspiateDuration);
+        Destroy(gameObject, dissipateDuration);
     }
 }

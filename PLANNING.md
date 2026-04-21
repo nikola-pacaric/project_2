@@ -85,14 +85,14 @@
 - [x] `SfxId.EnemyDeath` — `EnemyHealth.Die` (shared svi enemies)
 
 ### 3. Muzika
-- [ ] Gameplay loop — ground level tema (trigger na Start Screen → gameplay scene transition)
+- [x] Gameplay loop — ground level tema (trigger na Start Screen → gameplay scene transition)
 
 ### 4. Menu sistem
-- [ ] **Start Screen (scene)** — 2 dugmeta: **Play** i **Leaderboard**
+- [x] **Start Screen (scene)** — 2 dugmeta: **Play** i **Leaderboard**
   - Play → load gameplay scene, start session (v. 5e)
   - Leaderboard → otvori leaderboard panel (isti scene ili overlay) sa top-N listom
   - Fire leaderboard warmup ping on scene load (v. 5e)
-- [ ] **Pause Menu** — `Time.timeScale = 0`, Resume / Restart / Quit to Menu
+- [x] **Pause Menu** — `Time.timeScale = 0`, Resume / Restart / Quit to Menu
   - Disable input actions selectively dok je pauzirano
 - [x] Game Over Screen (already done)
 - [ ] Proširiti Game Over Screen: name input field + Submit/Skip dugmad (v. 5e)

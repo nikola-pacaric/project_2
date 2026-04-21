@@ -1,7 +1,10 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class RunTimer : MonoBehaviour
 {
+    private const string MENU_SCENE_NAME = "MainMenu";
+
     public static RunTimer Instance { get; private set; }
 
     public double ElapsedSeconds { get; private set; }
@@ -24,6 +27,30 @@ public class RunTimer : MonoBehaviour
         }
         Instance = this;
         DontDestroyOnLoad(gameObject);
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this) SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void Start()
+    {
+        TryAutoStart(SceneManager.GetActiveScene().name);
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (mode != LoadSceneMode.Single) return;
+        TryAutoStart(scene.name);
+    }
+
+    private void TryAutoStart(string sceneName)
+    {
+        if (IsRunning) return;
+        if (sceneName == MENU_SCENE_NAME) return;
+        StartRun();
     }
 
     private void Update()
