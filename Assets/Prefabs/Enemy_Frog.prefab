@@ -198,6 +198,7 @@ MonoBehaviour:
   maxHealth: 3
   currentHealth: 0
   scoreValue: 50
+  invulnerabilityDuration: 0.15
   deathAnimationPrefab: {fileID: 2909153326865099594, guid: 42ed730af960d4e43a2107a636a68281, type: 3}
 --- !u!70 &734662012209154432
 CapsuleCollider2D:
@@ -302,7 +303,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.026550293, y: 0.8425948}
+  m_Offset: {x: 0.030736923, y: 0.8321264}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -312,7 +313,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1.3258667, y: 0.4}
+  m_Size: {x: 1.2672462, y: 0.37906313}
   m_EdgeRadius: 0
 --- !u!1 &8131438834045106544
 GameObject:

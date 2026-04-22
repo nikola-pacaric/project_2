@@ -259,8 +259,8 @@ Transform:
   m_Children: []
   m_Father: {fileID: 5532018568407703565}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!60 &6829545022784498995
-PolygonCollider2D:
+--- !u!61 &6829545022784498995
+BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -293,7 +293,7 @@ PolygonCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: -0.06365967, y: 0.448}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -303,18 +303,8 @@ PolygonCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Points:
-    m_Paths:
-    - - {x: 0.31376648, y: 0.45005107}
-      - {x: 0.1255722, y: 0.54548}
-      - {x: -0.100486755, y: 0.55075336}
-      - {x: -0.1785965, y: 0.5497494}
-      - {x: -0.32446963, y: 0.5040846}
-      - {x: -0.4700241, y: 0.39084172}
-      - {x: -0.66751236, y: 0.14858758}
-      - {x: 0.58323824, y: 0.20219982}
-      - {x: 0.47225857, y: 0.2912838}
-  m_UseDelaunayMesh: 1
+  m_Size: {x: 1.1, y: 0.4}
+  m_EdgeRadius: 0
 --- !u!1 &6312369233183678001
 GameObject:
   m_ObjectHideFlags: 0

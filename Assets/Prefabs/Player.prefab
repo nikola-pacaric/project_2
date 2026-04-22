@@ -266,7 +266,7 @@ MonoBehaviour:
   spikeBounceForce: 18
   spikeHorizontalForce: 5
   gameOverUI: {fileID: 0}
-  gameOverDelay: 1
+  gameOverDelay: 0.75
 --- !u!114 &8718117472133729918
 MonoBehaviour:
   m_ObjectHideFlags: 0

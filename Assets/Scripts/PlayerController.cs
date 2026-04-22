@@ -26,6 +26,8 @@ public class PlayerController : MonoBehaviour
 
     [Header("Stomp")]
     [SerializeField] private float stompIgnoreDuration = 0.2f;
+    [SerializeField] private float stompStateBuffer = 0.15f;
+    [SerializeField] private float sameEnemyRestompCooldown = 0.35f;
 
     // Movement state
     private float coyoteTimeCounter;
@@ -33,6 +35,8 @@ public class PlayerController : MonoBehaviour
     private bool jumpQueued;
     private bool jumpConsumed;
     private bool isStomping;
+    private int lastStompedEnemyId;
+    private float lastStompTime = -999f;
     public bool isGrounded;
     private bool wasGrounded;
     private float lockMovementTimer;
@@ -279,6 +283,17 @@ public class PlayerController : MonoBehaviour
 
             if (enemy != null)
             {
+                // Same-enemy cooldown: falling back onto the frog we just stomped
+                // within the cooldown re-fired the bounce + SFX and produced a
+                // spurious "double stomp" feel. Chain-stomping different enemies
+                // is still allowed.
+                int enemyId = enemy.GetInstanceID();
+                if (enemyId == lastStompedEnemyId && Time.time - lastStompTime < sameEnemyRestompCooldown)
+                    return;
+
+                lastStompedEnemyId = enemyId;
+                lastStompTime = Time.time;
+
                 isStomping = true;
                 enemy.TakeDamage(1);
 
@@ -291,7 +306,8 @@ public class PlayerController : MonoBehaviour
                 anim.SetTrigger("jumpUp");
                 AudioManager.Instance?.PlaySFX(SfxId.Stomp);
                 coyoteTimeCounter = 0f;
-                Invoke(nameof(ResetStomp), stompIgnoreDuration);
+                CancelInvoke(nameof(ResetStomp));
+                Invoke(nameof(ResetStomp), stompIgnoreDuration + stompStateBuffer);
             }
         }
     }
