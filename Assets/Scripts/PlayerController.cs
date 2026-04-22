@@ -27,8 +27,6 @@ public class PlayerController : MonoBehaviour
     [Header("Stomp")]
     [SerializeField] private float stompIgnoreDuration = 0.2f;
 
-    private static readonly ContactPoint2D[] contactBuffer = new ContactPoint2D[8];
-
     // Movement state
     private float coyoteTimeCounter;
     private bool jumpPressed;
@@ -223,6 +221,15 @@ public class PlayerController : MonoBehaviour
             var results = rb.Slide(desiredVelocity, Time.fixedDeltaTime, slideMovement);
             anim.SetFloat("Speed", Mathf.Abs(results.remainingVelocity.x));
             anim.SetBool("isGrounded", true);
+
+            // Slide stops flush against obstacles without firing OnCollisionEnter2D,
+            // so enemy contact damage has to be detected from the slide hit directly.
+            if (!isStomping && results.slideHit.collider != null
+                && results.slideHit.collider.CompareTag("Enemy")
+                && TryGetComponent<PlayerHealth>(out PlayerHealth ph))
+            {
+                ph.TakeEnemyDamage(1);
+            }
         }
         else
         {
@@ -305,21 +312,14 @@ public class PlayerController : MonoBehaviour
         if (!collision.gameObject.CompareTag("Enemy")) return;
         if (isStomping) return;
 
-        // Let the stomp trigger handle any landing from above. The trigger and
-        // this collision can fire in the same physics step in unspecified
-        // order, so we also suppress damage when the geometry clearly shows a
-        // top-down hit: any contact with an up-facing normal, OR the player
-        // falling onto a point above the enemy's center.
+        // Position-based top-hit check. Contact normals on rounded/capsule
+        // enemy colliders aren't reliable near the corners, so decide by
+        // position: if the player's feet are above the enemy's center and
+        // the player isn't moving upward, the Stomp trigger owns this contact.
+        float playerBottom = col.bounds.min.y;
         float enemyCenterY = collision.collider.bounds.center.y;
-        bool landingFromAbove = rb.linearVelocity.y <= 0.1f;
-
-        int contactCount = collision.GetContacts(contactBuffer);
-        for (int i = 0; i < contactCount; i++)
-        {
-            ContactPoint2D c = contactBuffer[i];
-            if (c.normal.y > 0.5f) return;
-            if (landingFromAbove && c.point.y > enemyCenterY) return;
-        }
+        if (rb.linearVelocity.y <= 0.1f && playerBottom >= enemyCenterY)
+            return;
 
         if (TryGetComponent<PlayerHealth>(out PlayerHealth ph))
             ph.TakeEnemyDamage(1);

@@ -767,6 +767,7 @@ MonoBehaviour:
   mainMenuButton: {fileID: 40166475542586965}
   arc1SceneName: Arc_1
   mainMenuSceneName: MainMenu
+  leaderboardConfig: {fileID: 11400000, guid: 903c05f81b93f784ba0cca4851ba8528, type: 2}
 --- !u!114 &8662070259520441970
 MonoBehaviour:
   m_ObjectHideFlags: 0

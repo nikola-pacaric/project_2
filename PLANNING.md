@@ -97,61 +97,107 @@
 - [x] Game Over Screen (already done)
 - [ ] Proširiti Game Over Screen: name input field + Submit/Skip dugmad (v. 5e)
 
-### 5. Leaderboard — MongoDB backend
+### 5. Leaderboard — Unity Gaming Services (UGS)
 
-**Stack:** MongoDB Atlas free tier (M0 cluster) + Atlas App Services HTTPS endpoints. Bez plaćanja, bez zasebnog backend servera. App Services funkcije imaju cold start (~1–3s) → rešavamo warmup ping-om sa Start Screen-a tako da je leaderboard brz kad korisnik klikne dugme.
+**Stack:** UGS Authentication (anonymous sign-in) + UGS Leaderboards. Unity-native, first-party, free tier (50k MAU). Nema custom backend, nema deploy koraka, nema CORS setup-a — Unity SDK hendluje sve preko `UnityServices` API-ja.
 
-#### 5a. Provisioning (korisnik radi sam — Claude ne može login u Atlas)
-- [ ] Atlas signup + free M0 cluster
-- [ ] Create DB user + whitelist IP (0.0.0.0/0 za WebGL public access)
-- [ ] Create database `platformer`, collection `sessions`
-- [ ] Create Atlas App Services app linked to cluster
-- [ ] Create HTTPS endpoints (v. 5c)
-- [ ] Copy endpoint base URL → upisati u Unity `LeaderboardConfig` ScriptableObject
+⚠️ Originalno planirano na MongoDB Atlas App Services — **deprecated 2025-09-30**, nije dostupan za nove naloge. Pivot na UGS jer je standard za Unity projekte i ne zahteva custom backend hosting.
 
-#### 5b. Data model
+#### 5a. Dashboard provisioning (korisnik radi sam na cloud.unity.com — Claude ne može login)
+- [x] Signup/login na **cloud.unity.com** (isti Unity ID kao Editor)
+- [x] Kreirati ili link-ovati Unity Cloud Project sa lokalnim Unity Editor projektom
+- [ ] Enable **Authentication** servis + turn on **Anonymous** identity provider
+- [x] Enable **Leaderboards** servis
+- [x] Create leaderboard:
+  - ID: `main_scores`
+  - Sort order: **Descending** (higher score = better)
+  - Update type: **Keep Best** (overwrite samo ako novi score > postojeći)
+  - Reset: **None** (all-time leaderboard)
+- [x] Verifikovati u Editor-u: Edit > Project Settings > Services → pokazuje linked Project ID + Environment
+
+#### 5b. Data model (per-player-per-leaderboard entry)
+UGS Leaderboards auto-genericka šema:
 ```
-sessions {
-  sessionId: string         // GUID, client-generated
-  name: string | null       // null ili "" → prikazati "Player" u UI
-  score: number
-  timePlayed: number        // seconds
-  createdAt: Date           // server-set on insert
+{
+  playerId:   string   // auto-assigned od Authentication servisa
+  playerName: string   // set preko UpdatePlayerNameAsync; null/"" → UI prikazuje "Player"
+  score:      double   // u našem slučaju int score
+  metadata:   string   // arbitrary JSON — koristimo za { "timePlayed": seconds }
+  rank:       int      // server-computed, read-only
+  updatedAt:  DateTime // server-set
 }
 ```
-Index: `{ score: -1, createdAt: -1 }` za brz top-N query.
 
-#### 5c. Atlas App Services HTTPS endpoints
-- [ ] `GET /warmup` — vraća 200, no-op. Poziva se sa Start Screen-a za cold-start mitigation.
-- [ ] `POST /sessions` — body: `{ sessionId, score, timePlayed }`. Server insert sa `name: null`, `createdAt: now()`. Return 200.
-- [ ] `PATCH /sessions/:sessionId/name` — body: `{ name }`. Update record. Idempotent — no-op ako sessionId ne postoji ili name je već upisan.
-- [ ] `GET /leaderboard?limit=N` — top-N sortirano po score desc. Default limit 50.
-- [ ] CORS: allow origin = GitHub Pages URL (konfiguriše se u App Services)
+#### 5c. Unity package setup (korisnik radi kroz Package Manager)
+- [x] Window > Package Manager → Unity Registry → install:
+  - `com.unity.services.core`
+  - `com.unity.services.authentication`
+  - `com.unity.services.leaderboards`
+- [x] Edit > Project Settings > Services → link na Unity Cloud project iz 5a
 
-#### 5d. Unity client
-- [ ] `LeaderboardConfig.cs` ScriptableObject — holds endpoint base URL (lako menjati bez rebuild-a koda)
-- [ ] `LeaderboardClient.cs` — UnityWebRequest wrappers:
-  - `Warmup()` (fire-and-forget)
-  - `SubmitSession(sessionId, score, timePlayed)` — POST
-  - `SubmitName(sessionId, name)` — PATCH
-  - `FetchTopN(limit)` — GET, vraća listu entry-ja
-- [ ] `SessionTracker.cs` — generiše `sessionId` (GUID) on game start, trackuje `timePlayed` preko `Time.unscaledTime` delta (pauza ne broji), exposes current values
-- [ ] Name display fallback: empty/null name → render as "Player" u leaderboard UI
-- [ ] Time format helper: seconds → `mm:ss` za prikaz
+#### 5d. Unity client scripts
+- [x] `LeaderboardConfig.cs` ScriptableObject — drži leaderboard ID (`main_scores`) i default fetch limit (50)
+- [x] `LeaderboardClient.cs` — async wrappers (rade UniTask/Task):
+  - `InitializeAsync()` — `UnityServices.InitializeAsync()` + `AuthenticationService.Instance.SignInAnonymouslyAsync()`
+  - `SubmitScoreAsync(score, timePlayed)` — `LeaderboardsService.Instance.AddPlayerScoreAsync(id, score, new AddPlayerScoreOptions { Metadata = "{\"timePlayed\":X}" })`
+  - `SubmitNameAsync(name)` — `AuthenticationService.Instance.UpdatePlayerNameAsync(name)` (globalno per-player ime, vidljivo u svim leaderboardima)
+  - `FetchTopNAsync(limit)` — `LeaderboardsService.Instance.GetScoresAsync(id, new GetScoresOptions { Limit = limit })`
+- [x] `SessionTracker.cs` — trackuje `timePlayed` preko `Time.unscaledTime` delta (pauza ne broji). Nema više GUID-a (UGS auto-hendluje identitet).
+- [ ] Name display fallback: empty/null `playerName` → render kao "Player"
+- [ ] Time format helper: seconds → `mm:ss`
 
 #### 5e. Integration points
-- [ ] Start Screen `Awake()` → `LeaderboardClient.Warmup()` (fire-and-forget, cold-start mitigation)
-- [ ] Start Screen Leaderboard dugme → `FetchTopN(50)` → populate UI listu (name, score, timePlayed mm:ss)
-- [ ] Play dugme → `SessionTracker.StartSession()` (reset sessionId + timer) → load gameplay scene
-- [ ] `GameOverUI.Show()` → `SubmitSession(...)` fire-and-forget (record se kreira odmah, i ako igrač zatvori tab bez imena ostaje u leaderboard-u)
-- [ ] Name input Submit → `SubmitName(...)`; Skip → zatvori (record već postoji sa null name → prikazuje se kao "Player")
+- [ ] Start Screen `Awake()` → `LeaderboardClient.InitializeAsync()` (zamenjuje stari Warmup ping — ovo je stvarna UGS inicijalizacija + anonimni sign-in)
+- [ ] Start Screen Leaderboard dugme → `FetchTopNAsync(50)` → populate UI listu (playerName, score, timePlayed mm:ss)
+- [ ] Play dugme → `SessionTracker.StartSession()` (reset timer) → load gameplay scene
+- [ ] `GameOverUI.Show()` → `SubmitScoreAsync(score, timePlayed)` fire-and-forget. KeepBest server-side → ne treba client-side poređenje.
+- [ ] Name input Submit → `SubmitNameAsync(name)`; Skip → zatvori (ime ostaje prazno → UI prikazuje "Player")
+
+#### 5f. WebGL compatibility
+- [ ] UGS podržava WebGL out-of-the-box; nema CORS setup (SDK priča sa `*.services.api.unity.com`, Unity hendluje)
+- [ ] `InitializeAsync` okružiti try/catch — failed init (offline) ne sme da sruši Start Screen; Leaderboard dugme u tom slučaju prikaže "Offline"
 
 ### 6. Deploy — WebGL + GitHub Pages
 - [ ] Unity WebGL build settings: Brotli compression, default ili minimalni custom template
 - [ ] Build output → GitHub Pages (odvojen repo ili `gh-pages` branch ovog repo-a — odluka pri deploy-u)
 - [ ] Configure GitHub Pages source (branch + folder)
-- [ ] Verifikovati: leaderboard endpointi rade iz WebGL build-a (CORS allow origin u Atlas App Services mora da matchuje GitHub Pages URL)
-- [ ] Smoke test: open page → warmup fires → klik Leaderboard (prazan na početku) → Play → završi game → submit name → refresh Leaderboard → vidiš entry
+- [ ] Verifikovati: UGS Authentication + Leaderboards rade iz WebGL build-a (nema CORS config potrebnog — SDK hendluje)
+- [ ] Smoke test: open page → init fires (anonimni sign-in) → klik Leaderboard (prazan na početku) → Play → završi game → submit name → refresh Leaderboard → vidiš entry
+
+---
+
+## Combat refactor — Hurtbox / Hitbox system (pre-DLC prep)
+
+**Why:** Current combat splits responsibility across tag-based triggers (`Stomp`, `Enemy`), `OnCollisionEnter2D` on `PlayerController`, and the slide-hit path in `FixedUpdate`. Two independent systems can decide the same physical contact, which required velocity/normal/position heuristics and an `isStomping` guard to disambiguate. That fragility will multiply with every new enemy in DLC 1–3 (slimer, mushroom, bat, boss dragon). Replace it with a standard Hurtbox/Hitbox model before adding more combat surface area.
+
+**Scope gate:** Do NOT start until Arc_2 is shipped and WebGL deploy (§6) is green. This refactor touches every enemy prefab + player combat scripts — too much regression risk pre-ship.
+
+### Design
+
+- `DamageInfo` struct — `{ int amount, Vector2 knockbackDir, GameObject source, DamageType type }` (`DamageType` enum: `Stomp`, `Slash`, `Contact`, `Projectile`, `Spike`)
+- `Hitbox.cs` — trigger collider, emits `DamageInfo` on overlap. Exposes `SetActive(bool)` for time-windowed attacks. Lives on: player feet (stomp), player slash arc, enemy bodies (contact), future projectiles.
+- `Hurtbox.cs` — trigger collider, receives `DamageInfo`. Forwards to a `Health` component via `ReceiveHit(DamageInfo)`. Always on.
+- `Health.cs` — unified replacement for `PlayerHealth` + `EnemyHealth`. Handles HP, i-frames, death event. Exposes `UnityEvent<DamageInfo> OnDamaged` so VFX/SFX/camera shake/score UI subscribe instead of being wired directly into health code.
+- Hitbox↔Hurtbox overlap resolved in a single place: `Hurtbox.OnTriggerEnter2D(hitbox) → health.ReceiveHit(hitbox.BuildDamageInfo())`. No tags, no contact normals, no `isStomping` bool.
+
+### Migration steps (incremental — one enemy at a time, old + new coexist during transition)
+
+- [ ] Create `Assets/Scripts/Combat/` — `DamageInfo.cs`, `Hitbox.cs`, `Hurtbox.cs`, `Health.cs`
+- [ ] Migrate `PlayerHealth` → `Health` on Player. Port `TakeEnemyDamage` / `TakeSpikeDamage` callers to fire through a player-contact Hitbox instead.
+- [ ] Replace player's Stomp behaviour: add child `Hitbox` at feet, active while `rb.linearVelocity.y < 0`. Delete the `OnTriggerEnter2D("Stomp")` path in `PlayerController`.
+- [ ] Replace player's Slash: `PlayerCombat` activates a child `Hitbox` during the slash anim window, deactivates after. Delete current slash damage dispatch.
+- [ ] Delete the `OnCollisionEnter2D` contact-damage block in `PlayerController` and the slide-hit damage path in `FixedUpdate`. Player damage is now ONLY Hurtbox-driven.
+- [ ] Migrate enemies one prefab at a time: `Enemy_Frog` → `Enemy_Eagle` → `Mushroom_Enemy` → snake/lizard/opossum. Each gets Hurtbox (body) + contact Hitbox (body, disabled during hitstun). Remove `Stomp_Box` child trigger — redundant.
+- [ ] `EnemyHealth` → `Health`. Move the 0.15s i-frame logic into `Health` so player and enemies share the same invulnerability model.
+- [ ] Subscribe existing systems to `Health.OnDamaged`: AudioManager SFX (`SfxId.Hit`, `SfxId.Stomp`, `SfxId.EnemyDeath`), knockback (`LockMovement`), GameManager score on death, flash VFX.
+- [ ] Remove now-unused tags (`Stomp`, possibly `Enemy` if no other systems check it). Audit `CompareTag` callsites.
+- [ ] Layer audit: use Physics2D layer collision matrix so Hitbox-vs-Hurtbox only fires between valid pairs (player-hitbox ↔ enemy-hurtbox, enemy-hitbox ↔ player-hurtbox). Prevents enemy-vs-enemy friendly fire accidentally.
+
+### Success criteria
+
+- Mutual damage (player + enemy both taking a hit from the same contact) is structurally impossible, not heuristically avoided.
+- Adding a new enemy requires zero changes to player scripts.
+- Adding a new attack type (projectile, AoE, boss breath) is: spawn a GameObject with a Hitbox + lifetime, done.
 
 ---
 

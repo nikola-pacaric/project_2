@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -12,6 +14,9 @@ public class GameOverUI : MonoBehaviour
     [SerializeField] private Button mainMenuButton;
     [SerializeField] private string arc1SceneName = "Arc_1";
     [SerializeField] private string mainMenuSceneName = "MainMenu";
+
+    [Header("Leaderboard")]
+    [SerializeField] private LeaderboardConfig leaderboardConfig;
 
     private void Awake()
     {
@@ -31,6 +36,23 @@ public class GameOverUI : MonoBehaviour
 
         if (panel != null) panel.SetActive(true);
         Time.timeScale = 0f;
+
+        double timePlayed = RunTimer.Instance != null ? RunTimer.Instance.ElapsedSeconds : 0d;
+        _ = SubmitScoreFireAndForget(finalScore, timePlayed);
+    }
+
+    private async Task SubmitScoreFireAndForget(int score, double timePlayed)
+    {
+        if (leaderboardConfig == null) return;
+        try
+        {
+            await LeaderboardClient.EnsureInitializedAsync(leaderboardConfig);
+            await LeaderboardClient.SubmitScoreAsync(score, timePlayed);
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning($"[GameOver] Leaderboard submit failed: {e.Message}");
+        }
     }
 
     private void OnRestartClicked()

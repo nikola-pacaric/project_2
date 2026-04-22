@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 4716072948821397651}
   - component: {fileID: 3831702886305489233}
   - component: {fileID: 1759917705012261058}
-  - component: {fileID: 6582203987390481652}
+  - component: {fileID: 734662012209154432}
   m_Layer: 9
   m_Name: Enemy_Frog
   m_TagString: Enemy
@@ -199,8 +199,8 @@ MonoBehaviour:
   currentHealth: 0
   scoreValue: 50
   deathAnimationPrefab: {fileID: 2909153326865099594, guid: 42ed730af960d4e43a2107a636a68281, type: 3}
---- !u!60 &6582203987390481652
-PolygonCollider2D:
+--- !u!70 &734662012209154432
+CapsuleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -233,30 +233,9 @@ PolygonCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0}
-    oldSize: {x: 1.55, y: 0.9}
-    newSize: {x: 1.625, y: 2}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Points:
-    m_Paths:
-    - - {x: 0.56736755, y: 0.8704066}
-      - {x: 0.11644745, y: 0.8615203}
-      - {x: -0.2643814, y: 0.8216624}
-      - {x: -0.42820132, y: 0.7728023}
-      - {x: -0.7467331, y: 0.45920366}
-      - {x: -0.74243546, y: 0.20701122}
-      - {x: -0.6572632, y: 0.07545352}
-      - {x: 0.49049455, y: 0.06838679}
-      - {x: 0.5983338, y: 0.28426424}
-      - {x: 0.736351, y: 0.4102366}
-      - {x: 0.7396683, y: 0.8152017}
-  m_UseDelaunayMesh: 1
+  m_Offset: {x: -0.0019865702, y: 0.44264898}
+  m_Size: {x: 1.4667562, y: 0.80370814}
+  m_Direction: 1
 --- !u!1 &4508669583787517186
 GameObject:
   m_ObjectHideFlags: 0
@@ -323,7 +302,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.03447914, y: 0.8425948}
+  m_Offset: {x: 0.026550293, y: 0.8425948}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -333,7 +312,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1.5716667, y: 0.2345165}
+  m_Size: {x: 1.3258667, y: 0.4}
   m_EdgeRadius: 0
 --- !u!1 &8131438834045106544
 GameObject:

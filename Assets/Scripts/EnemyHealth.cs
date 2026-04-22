@@ -6,11 +6,13 @@ public class EnemyHealth : MonoBehaviour
     [SerializeField] private int maxHealth = 3;
     [SerializeField] private int currentHealth;
     [SerializeField] private int scoreValue = 50;
+    [SerializeField] private float invulnerabilityDuration = 0.15f;
 
     [Header("Visual Effects")]
     [SerializeField] private GameObject deathAnimationPrefab;
     private SpriteRenderer sprite;
     private Color originalColor;
+    private float lastDamageTime = -999f;
 
     void Start()
     {
@@ -24,6 +26,9 @@ public class EnemyHealth : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
+        if (Time.time - lastDamageTime < invulnerabilityDuration) return;
+        lastDamageTime = Time.time;
+
         currentHealth -= damage;
         if (currentHealth <= 0)
         {
