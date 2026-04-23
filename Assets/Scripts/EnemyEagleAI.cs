@@ -21,6 +21,11 @@ public class EnemyEagleAI : MonoBehaviour
     [SerializeField] private float ceilingCheckRadius = 0.25f;
     [SerializeField] private float stuckTeleportTime = 8f;
 
+    [Header("Combat")]
+    [Tooltip("Enabled only during Dive so player can't be damaged by a hovering eagle, " +
+             "and can counter-stomp the dive.")]
+    [SerializeField] private Hitbox contactHitbox;
+
     private enum State { Hover, Spotted, Dive, Rise, Dead }
     private State state = State.Hover;
 
@@ -43,6 +48,8 @@ public class EnemyEagleAI : MonoBehaviour
         homeY = transform.position.y;
         leftX = transform.position.x - patrolDistance;
         rightX = transform.position.x + patrolDistance;
+
+        if (contactHitbox != null) contactHitbox.SetActive(false);
 
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
@@ -88,6 +95,7 @@ public class EnemyEagleAI : MonoBehaviour
 
         // ── Dive: lock direction toward player's position right now ──────────
         state = State.Dive;
+        if (contactHitbox != null) contactHitbox.SetActive(true);
 
         Vector2 diveDir = ((Vector2)playerTransform.position - rb.position).normalized;
         Vector2 diveStart = rb.position;
@@ -105,6 +113,7 @@ public class EnemyEagleAI : MonoBehaviour
 
         // Switch to Rise now so OnCollisionEnter2D stops interfering
         state = State.Rise;
+        if (contactHitbox != null) contactHitbox.SetActive(false);
         anim.SetBool("isDiving", false);
 
         float riseXDir = Mathf.Sign(diveDir.x);

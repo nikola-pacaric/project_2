@@ -1,61 +1,80 @@
 using System.Collections;
 using UnityEngine;
 
+[RequireComponent(typeof(Health))]
 public class EnemyHealth : MonoBehaviour
 {
-    [SerializeField] private int maxHealth = 3;
-    [SerializeField] private int currentHealth;
+    [SerializeField] private Health health;
     [SerializeField] private int scoreValue = 50;
-    [SerializeField] private float invulnerabilityDuration = 0.15f;
 
     [Header("Visual Effects")]
     [SerializeField] private GameObject deathAnimationPrefab;
+    [SerializeField] private float flashDuration = 0.1f;
+
+    [Header("Hitstun")]
+    [Tooltip("Contact Hitboxes to disable briefly on hit so the enemy can't damage the player while flinching.")]
+    [SerializeField] private Hitbox[] contactHitboxes;
+    [SerializeField] private float hitstunDuration = 0.15f;
+
     private SpriteRenderer sprite;
     private Color originalColor;
-    private float lastDamageTime = -999f;
 
-    void Start()
+    private void Awake()
     {
-        currentHealth = maxHealth;
+        if (health == null) health = GetComponent<Health>();
         sprite = GetComponent<SpriteRenderer>();
-        if (sprite != null)
-        {
-            originalColor = sprite.color;
-        }
+        if (sprite != null) originalColor = sprite.color;
     }
 
-    public void TakeDamage(int damage)
+    private void OnEnable()
     {
-        if (Time.time - lastDamageTime < invulnerabilityDuration) return;
-        lastDamageTime = Time.time;
+        health.OnDamaged.AddListener(HandleDamaged);
+        health.OnDied.AddListener(HandleDied);
+    }
 
-        currentHealth -= damage;
-        if (currentHealth <= 0)
-        {
-            Die();
-        }
-        else
-        {
-            StopAllCoroutines();
-            StartCoroutine(FlashRoutine());
-        }
+    private void OnDisable()
+    {
+        health.OnDamaged.RemoveListener(HandleDamaged);
+        health.OnDied.RemoveListener(HandleDied);
+    }
+
+    private void HandleDamaged(DamageInfo info)
+    {
+        StopAllCoroutines();
+        StartCoroutine(FlashRoutine());
+        if (contactHitboxes != null && contactHitboxes.Length > 0)
+            StartCoroutine(HitstunRoutine());
     }
 
     private IEnumerator FlashRoutine()
     {
+        if (sprite == null) yield break;
         sprite.color = Color.red;
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSeconds(flashDuration);
         sprite.color = originalColor;
     }
 
-    private void Die()
+    private IEnumerator HitstunRoutine()
+    {
+        foreach (Hitbox hb in contactHitboxes)
+            if (hb != null) hb.SetActive(false);
+
+        yield return new WaitForSeconds(hitstunDuration);
+
+        foreach (Hitbox hb in contactHitboxes)
+            if (hb != null) hb.SetActive(true);
+    }
+
+    private void HandleDied()
     {
         if (deathAnimationPrefab != null)
-        {
             Instantiate(deathAnimationPrefab, transform.position, Quaternion.identity);
-        }
+
         AudioManager.Instance?.PlaySFXAt(SfxId.EnemyDeath, transform.position);
-        GameManager.Instance.AddScore(scoreValue);
+
+        if (GameManager.Instance != null)
+            GameManager.Instance.AddScore(scoreValue);
+
         Destroy(gameObject);
     }
 }

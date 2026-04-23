@@ -9,6 +9,7 @@ public class MainMenu : MonoBehaviour
     [SerializeField] private Button playButton;
     [SerializeField] private Button leaderboardButton;
     [SerializeField] private Button settingsButton;
+    [SerializeField] private Button quitButton;
 
     [Header("Panels")]
     [SerializeField] private GameObject mainPanel;
@@ -31,6 +32,7 @@ public class MainMenu : MonoBehaviour
         if (settingsButton != null) settingsButton.onClick.AddListener(OpenSettings);
         if (settingsBackButton != null) settingsBackButton.onClick.AddListener(ShowMainPanel);
         if (leaderboardBackButton != null) leaderboardBackButton.onClick.AddListener(ShowMainPanel);
+        if (quitButton != null) quitButton.onClick.AddListener(QuitGame);
 
         ShowMainPanel();
         Time.timeScale = 1f;
@@ -107,4 +109,6 @@ public class MainMenu : MonoBehaviour
         if (leaderboardPanel != null) leaderboardPanel.SetActive(false);
         if (mainPanel != null) mainPanel.SetActive(true);
     }
+
+    private void QuitGame() => Application.Quit();
 }

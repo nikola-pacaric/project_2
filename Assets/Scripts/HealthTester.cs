@@ -2,35 +2,38 @@ using UnityEngine;
 
 public class HealthTester : MonoBehaviour
 {
-
+    private Health health;
     private PlayerHealth playerHealth;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+
     void Start()
     {
+        health = GetComponent<Health>();
         playerHealth = GetComponent<PlayerHealth>();
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.H))
-        {
-            playerHealth.TakeEnemyDamage(1);
-        }
+            DealTestDamage(1);
 
         if (Input.GetKeyDown(KeyCode.J))
-        {
-            playerHealth.TakeEnemyDamage(2);
-        }
+            DealTestDamage(2);
 
         if (Input.GetKeyDown(KeyCode.K))
-        {
             playerHealth.RespawnAfterFall();
-        }
 
         if (Input.GetKeyDown(KeyCode.L))
-        {
             playerHealth.GainHeart();
-        }
+    }
+
+    private void DealTestDamage(int amount)
+    {
+        health.ReceiveHit(new DamageInfo
+        {
+            amount = amount,
+            type = DamageType.Contact,
+            source = gameObject,
+            sourcePosition = transform.position
+        });
     }
 }

@@ -1,5 +1,3 @@
-using System;
-using System.Collections;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -25,18 +23,14 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float minPushInput = 0.1f;
 
     [Header("Stomp")]
-    [SerializeField] private float stompIgnoreDuration = 0.2f;
-    [SerializeField] private float stompStateBuffer = 0.15f;
-    [SerializeField] private float sameEnemyRestompCooldown = 0.35f;
+    [SerializeField] private Hitbox stompHitbox;
+    [SerializeField] private float stompBounceForce = 12f;
 
     // Movement state
     private float coyoteTimeCounter;
     private bool jumpPressed;
     private bool jumpQueued;
     private bool jumpConsumed;
-    private bool isStomping;
-    private int lastStompedEnemyId;
-    private float lastStompTime = -999f;
     public bool isGrounded;
     private bool wasGrounded;
     private float lockMovementTimer;
@@ -74,8 +68,21 @@ public class PlayerController : MonoBehaviour
         controls.Player.Jump.canceled  += ctx => { jumpPressed = false; jumpQueued = false; };
     }
 
-    private void OnEnable()  => controls.Player.Enable();
-    private void OnDisable() => controls.Player.Disable();
+    private void OnEnable()
+    {
+        controls.Player.Enable();
+        if (stompHitbox != null)
+        {
+            stompHitbox.OnHitLanded += HandleStompLanded;
+            stompHitbox.SetActive(false);
+        }
+    }
+
+    private void OnDisable()
+    {
+        controls.Player.Disable();
+        if (stompHitbox != null) stompHitbox.OnHitLanded -= HandleStompLanded;
+    }
 
     private void Start()
     {
@@ -90,6 +97,7 @@ public class PlayerController : MonoBehaviour
         if (lockMovementTimer > 0f)
         {
             lockMovementTimer -= Time.deltaTime;
+            UpdateStompHitbox();
             return;
         }
 
@@ -109,9 +117,6 @@ public class PlayerController : MonoBehaviour
         if (isGrounded && !wasGrounded)
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
 
-        // Clear jumpConsumed whenever we're on the ground and not rising.
-        // Covers the normal landing case AND the "jump blocked by low ceiling"
-        // case where the player never actually leaves the ground.
         if (isGrounded && rb.linearVelocity.y <= 0.1f)
             jumpConsumed = false;
 
@@ -126,7 +131,6 @@ public class PlayerController : MonoBehaviour
         // ── Climbing ──────────────────────────────────────────────────────────
         climbCooldown -= Time.deltaTime;
 
-        // Reset bottom-exit block when player presses up or leaves the ladder
         if (exitedClimbAtBottom && (!isOnLadder || moveInput.y > 0.1f))
             exitedClimbAtBottom = false;
 
@@ -144,7 +148,6 @@ public class PlayerController : MonoBehaviour
             }
             else if (isGrounded && moveInput.y < 0.1f && wasAirborneWhileClimbing)
             {
-                // Reached bottom of stairs — return to normal movement
                 exitedClimbAtBottom = true;
                 ExitClimb();
             }
@@ -152,7 +155,6 @@ public class PlayerController : MonoBehaviour
             {
                 rb.linearVelocity = new Vector2(moveInput.x * moveSpeed, moveInput.y * climbSpeed);
 
-                // Jump off stairs
                 if (jumpQueued && !jumpConsumed)
                 {
                     ExitClimb();
@@ -166,7 +168,6 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        // Still climbing after the checks above — lock animator and skip normal movement
         if (isClimbing)
         {
             anim.SetBool("isClimbing", true);
@@ -175,6 +176,7 @@ public class PlayerController : MonoBehaviour
             anim.SetBool("isGrounded", false);
             anim.speed = Mathf.Abs(moveInput.y) > 0.1f ? 1f : 0f;
             velocity = rb.linearVelocity.y;
+            UpdateStompHitbox();
             return;
         }
 
@@ -206,12 +208,14 @@ public class PlayerController : MonoBehaviour
         anim.SetFloat("verticalVelocity", rb.linearVelocity.y);
         anim.SetBool("isGrounded", isGrounded);
         velocity = rb.linearVelocity.y;
+
+        UpdateStompHitbox();
     }
 
     private void FixedUpdate()
     {
-        if (isClimbing) return; // velocity is set in Update while climbing
-        if (lockMovementTimer > 0f) return; // preserve knockback velocity
+        if (isClimbing) return;
+        if (lockMovementTimer > 0f) return;
 
         float slopeBoost  = isGrounded && !jumpPressed ? 1.5f : 1f;
         float targetSpeed = moveInput.x * moveSpeed * slopeBoost;
@@ -225,15 +229,6 @@ public class PlayerController : MonoBehaviour
             var results = rb.Slide(desiredVelocity, Time.fixedDeltaTime, slideMovement);
             anim.SetFloat("Speed", Mathf.Abs(results.remainingVelocity.x));
             anim.SetBool("isGrounded", true);
-
-            // Slide stops flush against obstacles without firing OnCollisionEnter2D,
-            // so enemy contact damage has to be detected from the slide hit directly.
-            if (!isStomping && results.slideHit.collider != null
-                && results.slideHit.collider.CompareTag("Enemy")
-                && TryGetComponent<PlayerHealth>(out PlayerHealth ph))
-            {
-                ph.TakeEnemyDamage(1);
-            }
         }
         else
         {
@@ -245,6 +240,26 @@ public class PlayerController : MonoBehaviour
         PushBox();
     }
 
+    // ── Stomp ─────────────────────────────────────────────────────────────────
+
+    private void UpdateStompHitbox()
+    {
+        if (stompHitbox == null) return;
+        // Active whenever falling in-air. Hurtbox placement on stompable enemies
+        // decides whether the stomp lands; shape, not code, gates stompability.
+        bool falling = !isGrounded && rb != null && rb.linearVelocity.y < 0f;
+        stompHitbox.SetActive(falling);
+    }
+
+    private void HandleStompLanded(Hurtbox target)
+    {
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
+        rb.AddForce(Vector2.up * stompBounceForce, ForceMode2D.Impulse);
+        anim.SetTrigger("jumpUp");
+        AudioManager.Instance?.PlaySFX(SfxId.Stomp);
+        coyoteTimeCounter = 0f;
+    }
+
     // ── Climbing helpers ──────────────────────────────────────────────────────
 
     private void EnterClimb()
@@ -252,7 +267,7 @@ public class PlayerController : MonoBehaviour
         isClimbing = true;
         rb.gravityScale = 0f;
         rb.linearVelocity = Vector2.zero;
-        col.isTrigger = true;
+        if (col != null) col.isTrigger = true;
         wasAirborneWhileClimbing = false;
         jumpConsumed = false;
     }
@@ -263,7 +278,7 @@ public class PlayerController : MonoBehaviour
         rb.gravityScale = originalGravityScale;
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
         anim.speed = 1f;
-        col.isTrigger = false;
+        if (col != null) col.isTrigger = false;
         climbCooldown = 0.25f;
     }
 
@@ -272,73 +287,20 @@ public class PlayerController : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.TryGetComponent<Climbable>(out _))
-        {
             isOnLadder = true;
-            return;
-        }
-
-        if (other.CompareTag("Stomp"))
-        {
-            EnemyHealth enemy = other.GetComponentInParent<EnemyHealth>();
-
-            if (enemy != null)
-            {
-                // Same-enemy cooldown: falling back onto the frog we just stomped
-                // within the cooldown re-fired the bounce + SFX and produced a
-                // spurious "double stomp" feel. Chain-stomping different enemies
-                // is still allowed.
-                int enemyId = enemy.GetInstanceID();
-                if (enemyId == lastStompedEnemyId && Time.time - lastStompTime < sameEnemyRestompCooldown)
-                    return;
-
-                lastStompedEnemyId = enemyId;
-                lastStompTime = Time.time;
-
-                isStomping = true;
-                enemy.TakeDamage(1);
-
-                Collider2D enemyCollider = other.transform.parent.GetComponent<Collider2D>();
-                if (enemyCollider != null)
-                    StartCoroutine(IgnoreCollisionRoutine(enemyCollider));
-
-                rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
-                rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
-                anim.SetTrigger("jumpUp");
-                AudioManager.Instance?.PlaySFX(SfxId.Stomp);
-                coyoteTimeCounter = 0f;
-                CancelInvoke(nameof(ResetStomp));
-                Invoke(nameof(ResetStomp), stompIgnoreDuration + stompStateBuffer);
-            }
-        }
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
-        if (other.TryGetComponent<Climbable>(out _))
-        {
-            isOnLadder = false;
-            if (isClimbing) ExitClimb();
-        }
-    }
+        if (!other.TryGetComponent<Climbable>(out _)) return;
 
-    // ── Collision ────────────────────────────────────────────────────────────
+        // Child colliders (stomp hitbox) toggle on/off every frame and bubble
+        // their trigger events up to this Rigidbody2D. Only treat this as a
+        // real ladder exit if the main body collider is no longer touching.
+        if (col != null && col.IsTouching(other)) return;
 
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (!collision.gameObject.CompareTag("Enemy")) return;
-        if (isStomping) return;
-
-        // Position-based top-hit check. Contact normals on rounded/capsule
-        // enemy colliders aren't reliable near the corners, so decide by
-        // position: if the player's feet are above the enemy's center and
-        // the player isn't moving upward, the Stomp trigger owns this contact.
-        float playerBottom = col.bounds.min.y;
-        float enemyCenterY = collision.collider.bounds.center.y;
-        if (rb.linearVelocity.y <= 0.1f && playerBottom >= enemyCenterY)
-            return;
-
-        if (TryGetComponent<PlayerHealth>(out PlayerHealth ph))
-            ph.TakeEnemyDamage(1);
+        isOnLadder = false;
+        if (isClimbing) ExitClimb();
     }
 
     // ── Misc helpers ─────────────────────────────────────────────────────────
@@ -370,16 +332,6 @@ public class PlayerController : MonoBehaviour
             boxRb.linearVelocity = new Vector2(dir * boxPushSpeed, boxRb.linearVelocity.y);
             return;
         }
-    }
-
-    private void ResetStomp() => isStomping = false;
-
-    private IEnumerator IgnoreCollisionRoutine(Collider2D enemyCollider)
-    {
-        Physics2D.IgnoreCollision(GetComponent<Collider2D>(), enemyCollider, true);
-        yield return new WaitForSeconds(stompIgnoreDuration);
-        if (enemyCollider != null)
-            Physics2D.IgnoreCollision(GetComponent<Collider2D>(), enemyCollider, false);
     }
 
     public void LockMovement(float duration) => lockMovementTimer = duration;

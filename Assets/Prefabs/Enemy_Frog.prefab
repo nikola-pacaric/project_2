@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 3831702886305489233}
   - component: {fileID: 1759917705012261058}
   - component: {fileID: 734662012209154432}
+  - component: {fileID: 2664956178783871831}
   m_Layer: 9
   m_Name: Enemy_Frog
   m_TagString: Enemy
@@ -37,7 +38,8 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1020233824532650519}
-  - {fileID: 9037326015821594233}
+  - {fileID: 7504514887531626219}
+  - {fileID: 2059363709470287845}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &8421724025222091395
@@ -195,11 +197,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b56eb25482608447af4f7e9ff9e2c7a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
-  maxHealth: 3
-  currentHealth: 0
+  health: {fileID: 0}
   scoreValue: 50
-  invulnerabilityDuration: 0.15
   deathAnimationPrefab: {fileID: 2909153326865099594, guid: 42ed730af960d4e43a2107a636a68281, type: 3}
+  flashDuration: 0.1
+  contactHitboxes:
+  - {fileID: 2991512683701340553}
+  hitstunDuration: 0.15
 --- !u!70 &734662012209154432
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -237,7 +241,30 @@ CapsuleCollider2D:
   m_Offset: {x: -0.0019865702, y: 0.44264898}
   m_Size: {x: 1.4667562, y: 0.80370814}
   m_Direction: 1
---- !u!1 &4508669583787517186
+--- !u!114 &2664956178783871831
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1860765460212561196}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7874e61bbe3913343b9914eff6d25921, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Health
+  maxHP: 3
+  invulnerabilityDuration: 0.15
+  onDamaged:
+    m_PersistentCalls:
+      m_Calls: []
+  onHPChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  onDied:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!1 &7157276360041007351
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -245,37 +272,38 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 9037326015821594233}
-  - component: {fileID: 168174863349085208}
+  - component: {fileID: 2059363709470287845}
+  - component: {fileID: 611715421529751504}
+  - component: {fileID: 2991512683701340553}
   m_Layer: 9
-  m_Name: Stomp_Box
-  m_TagString: Stomp
+  m_Name: Hitbox_Body
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &9037326015821594233
+--- !u!4 &2059363709470287845
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4508669583787517186}
+  m_GameObject: {fileID: 7157276360041007351}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.025, z: 0}
+  m_LocalPosition: {x: 0, y: 0.299, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6546440410777016858}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!61 &168174863349085208
+--- !u!61 &611715421529751504
 BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4508669583787517186}
+  m_GameObject: {fileID: 7157276360041007351}
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
@@ -303,7 +331,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.030736923, y: 0.8321264}
+  m_Offset: {x: -0.0010471344, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -313,8 +341,24 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1.2672462, y: 0.37906313}
+  m_Size: {x: 1.4627037, y: 0.6}
   m_EdgeRadius: 0
+--- !u!114 &2991512683701340553
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7157276360041007351}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 896b70a818bd91946b71a60c65a4e753, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Hitbox
+  amount: 1
+  type: 2
+  sourceOverride: {fileID: 0}
+  singleHitPerActivation: 0
 --- !u!1 &8131438834045106544
 GameObject:
   m_ObjectHideFlags: 0
@@ -346,3 +390,95 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6546440410777016858}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &8770526917125067289
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7504514887531626219}
+  - component: {fileID: 2229746174641638168}
+  - component: {fileID: 8683490625596501651}
+  m_Layer: 13
+  m_Name: Hurtbox_Body
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7504514887531626219
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8770526917125067289}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.425, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6546440410777016858}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!61 &2229746174641638168
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8770526917125067289}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0.0041885376, y: 0.040826797}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 1.4396744, y: 0.9183464}
+  m_EdgeRadius: 0
+--- !u!114 &8683490625596501651
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8770526917125067289}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba3632c0ea4a8f449bc1ca6f61abba47, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Hurtbox
+  health: {fileID: 0}

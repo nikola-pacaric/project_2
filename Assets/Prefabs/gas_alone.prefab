@@ -14,7 +14,8 @@ GameObject:
   - component: {fileID: 500578137529657578}
   - component: {fileID: 4731945904063760454}
   - component: {fileID: -5821702804208871933}
-  m_Layer: 9
+  - component: {fileID: 4688996261323275564}
+  m_Layer: 14
   m_Name: gas_alone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -178,8 +179,8 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.31546226, y: -0.06715776}
-  m_Size: {x: 1.0850031, y: 0.6561633}
+  m_Offset: {x: 0.27850845, y: -0.06715776}
+  m_Size: {x: 1.0110983, y: 0.656165}
   m_Direction: 1
 --- !u!114 &-5821702804208871933
 MonoBehaviour:
@@ -196,5 +197,23 @@ MonoBehaviour:
   moveSpeed: 4
   spawnDuration: 0.4
   travelDuration: 3
-  disspiateDuration: 0.5
-  damage: 1
+  dissipateDuration: 0.5
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 128
+--- !u!114 &4688996261323275564
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 484177558917367482}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 896b70a818bd91946b71a60c65a4e753, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Hitbox
+  amount: 2
+  type: 3
+  sourceOverride: {fileID: 0}
+  singleHitPerActivation: 0

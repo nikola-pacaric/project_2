@@ -1,182 +1,109 @@
 using System.Collections;
 using UnityEngine;
 
+[RequireComponent(typeof(Health))]
 public class PlayerHealth : MonoBehaviour
 {
     public static event System.Action OnHealthChanged;
 
-    public int maxHearts = 3;
-    public int segmentsPerHeart = 4;
-    public int currentSegment;
+    [SerializeField] private Health health;
+    [SerializeField] private int segmentsPerHeartValue = 4;
 
-    public Vector2 respawnPoint;
-
-    [Header("Damage Effects")]
-    [SerializeField] private float invincibilityDuration = 0.8f;
+    [Header("Knockback")]
+    [SerializeField] private float enemyKnockbackX = 9f;
+    [SerializeField] private float enemyKnockbackY = 9f;
     [SerializeField] private float spikeBounceForce = 9f;
     [SerializeField] private float spikeHorizontalForce = 5f;
+    [SerializeField] private float knockbackLockDuration = 0.3f;
+
+    [Header("Visual")]
+    [SerializeField] private float flashDuration = 0.2f;
 
     [Header("Game Over")]
     [SerializeField] private GameOverUI gameOverUI;
     [SerializeField] private float gameOverDelay = 1.5f;
 
+    public Vector2 respawnPoint;
+
+    // Legacy public surface — kept for HeartsUI, GameManager, Checkpoint compat
+    public int maxHearts => Mathf.Max(1, health.MaxHP / segmentsPerHeartValue);
+    public int currentSegment => health.CurrentHP;
+    public int segmentsPerHeart => segmentsPerHeartValue;
+
     private SpriteRenderer sprite;
     private Color originalColor;
-    private bool isInvincible;
+    private PlayerController pc;
+    private Rigidbody2D rb;
+    private Animator anim;
     private bool isDead;
 
-
-    void Start()
+    private void Awake()
     {
-        currentSegment = maxHearts * segmentsPerHeart;
-        respawnPoint = transform.position;
-
+        if (health == null) health = GetComponent<Health>();
         sprite = GetComponent<SpriteRenderer>();
-        originalColor = sprite.color;
+        pc = GetComponent<PlayerController>();
+        rb = GetComponent<Rigidbody2D>();
+        anim = GetComponent<Animator>();
+        if (sprite != null) originalColor = sprite.color;
+    }
 
+    private void OnEnable()
+    {
+        health.OnDamaged.AddListener(HandleDamaged);
+        health.OnHPChanged.AddListener(HandleHPChanged);
+        health.OnDied.AddListener(HandleDied);
+    }
+
+    private void OnDisable()
+    {
+        health.OnDamaged.RemoveListener(HandleDamaged);
+        health.OnHPChanged.RemoveListener(HandleHPChanged);
+        health.OnDied.RemoveListener(HandleDied);
+    }
+
+    private void Start()
+    {
+        respawnPoint = transform.position;
         OnHealthChanged?.Invoke();
     }
 
-    public void GainHeart()
+    private void HandleHPChanged() => OnHealthChanged?.Invoke();
+
+    private void HandleDamaged(DamageInfo info)
     {
-        maxHearts++;
-        currentSegment = maxHearts * segmentsPerHeart;
-        OnHealthChanged?.Invoke();
-    }
-
-    public void RespawnAfterFall()
-    {
-        int remainder = currentSegment % segmentsPerHeart;
-
-        if (remainder == 0)
-        {
-            currentSegment -= segmentsPerHeart;
-        }
-        else
-        {
-            currentSegment -= remainder;
-        }
-        currentSegment = Mathf.Max(currentSegment, 0);
-
-        transform.position = respawnPoint;
-        OnHealthChanged?.Invoke();
-
-        if(currentSegment <= 0)
-        {
-            GameOver();
-        }
-    }
-
-    public void RespawnAfterEnvironmentDamage(int segmentsLost)
-    {
-        currentSegment -= segmentsLost;
-        currentSegment = Mathf.Max (currentSegment, 0);
-
-        transform.position = respawnPoint;
-        OnHealthChanged?.Invoke();
-
-        if(currentSegment <= 0)
-        {
-            GameOver();
-        }
-    }
-
-    public void TakeEnemyDamage(int segmentsLost)
-    {
-        if (isInvincible) return;
-
-        currentSegment -= segmentsLost;
-        currentSegment = Mathf.Max(currentSegment, 0);
-        OnHealthChanged?.Invoke();
-
         AudioManager.Instance?.PlaySFX(SfxId.Hit);
         StartCoroutine(FlashRed());
-
-        Animator anim = GetComponent<Animator>();
-        anim.SetTrigger("isHurt");
-
-        ApplyKnockback();
-        StartCoroutine(InvincibilityCoroutine());
-
-        if (currentSegment <= 0)
-        {
-            GameOver();
-        }
+        if (anim != null) anim.SetTrigger("isHurt");
+        ApplyKnockback(info);
     }
 
-    public void TakeSpikeDamage(int segmentsLost)
+    private IEnumerator FlashRed()
     {
-        if (isInvincible) return;
-
-        currentSegment -= segmentsLost;
-        currentSegment = Mathf.Max(currentSegment, 0);
-        OnHealthChanged?.Invoke();
-
-        AudioManager.Instance?.PlaySFX(SfxId.Hit);
-        StartCoroutine(FlashRed());
-
-        GetComponent<Animator>().SetTrigger("isHurt");
-
-        ApplySpikeKnockback();
-        StartCoroutine(InvincibilityCoroutine());
-
-        if (currentSegment <= 0)
-        {
-            GameOver();
-        }
-    }
-
-    IEnumerator FlashRed()
-    {
+        if (sprite == null) yield break;
         sprite.color = Color.red;
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(flashDuration);
         sprite.color = originalColor;
     }
 
-    void ApplyKnockback()
+    private void ApplyKnockback(DamageInfo info)
     {
-        GetComponent<PlayerController>().LockMovement(0.3f);
-
-        Rigidbody2D rb = GetComponent<Rigidbody2D>();
-        float dir = transform.localScale.x > 0 ? -1 : 1;
-
+        if (pc != null) pc.LockMovement(knockbackLockDuration);
+        if (rb == null) return;
         rb.linearVelocity = Vector2.zero;
-        rb.linearVelocity = new Vector2(dir * 9f, 9f);
+
+        if (info.type == DamageType.Spike)
+        {
+            float horizontalInput = pc != null ? pc.MoveInputX : 0f;
+            rb.linearVelocity = new Vector2(horizontalInput * spikeHorizontalForce, spikeBounceForce);
+        }
+        else
+        {
+            float dir = transform.position.x >= info.sourcePosition.x ? 1f : -1f;
+            rb.linearVelocity = new Vector2(dir * enemyKnockbackX, enemyKnockbackY);
+        }
     }
 
-    void ApplySpikeKnockback()
-    {
-        PlayerController pc = GetComponent<PlayerController>();
-        pc.LockMovement(0.3f);
-
-        Rigidbody2D rb = GetComponent<Rigidbody2D>();
-        float horizontalInput = pc.MoveInputX;
-
-        rb.linearVelocity = Vector2.zero;
-        rb.linearVelocity = new Vector2(horizontalInput * spikeHorizontalForce, spikeBounceForce);
-    }
-
-    IEnumerator InvincibilityCoroutine()
-    {
-        isInvincible = true;
-        yield return new WaitForSeconds(invincibilityDuration);
-        isInvincible = false;
-    }
-
-    public void Heal(int segmentsGained)
-    {
-        currentSegment = Mathf.Min(currentSegment + segmentsGained, maxHearts * segmentsPerHeart);
-        OnHealthChanged?.Invoke();
-    }
-
-    public void RestoreState(int restoredMaxHearts, int restoredCurrentSegment)
-    {
-        maxHearts = restoredMaxHearts;
-        currentSegment = Mathf.Clamp(restoredCurrentSegment, 0, maxHearts * segmentsPerHeart);
-        OnHealthChanged?.Invoke();
-    }
-
-    private void GameOver()
+    private void HandleDied()
     {
         if (isDead) return;
         isDead = true;
@@ -187,10 +114,35 @@ public class PlayerHealth : MonoBehaviour
     private IEnumerator GameOverSequence()
     {
         yield return new WaitForSeconds(gameOverDelay);
-
         if (gameOverUI != null && GameManager.Instance != null)
-        {
             gameOverUI.Show(GameManager.Instance.Score);
-        }
+    }
+
+    // ── Public API ──────────────────────────────────────────────────────────
+
+    public void GainHeart()
+    {
+        health.SetMaxHP(health.MaxHP + segmentsPerHeartValue, refill: true);
+    }
+
+    public void RespawnAfterFall()
+    {
+        int remainder = health.CurrentHP % segmentsPerHeartValue;
+        int lose = remainder == 0 ? segmentsPerHeartValue : remainder;
+        health.LoseHP(lose);
+        transform.position = respawnPoint;
+    }
+
+    public void RespawnAfterEnvironmentDamage(int segmentsLost)
+    {
+        health.LoseHP(segmentsLost);
+        transform.position = respawnPoint;
+    }
+
+    public void Heal(int segmentsGained) => health.Heal(segmentsGained);
+
+    public void RestoreState(int restoredMaxHearts, int restoredCurrentSegment)
+    {
+        health.RestoreState(restoredMaxHearts * segmentsPerHeartValue, restoredCurrentSegment);
     }
 }
