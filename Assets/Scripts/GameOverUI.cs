@@ -31,7 +31,7 @@ public class GameOverUI : MonoBehaviour
     {
         if (restartButton != null) restartButton.onClick.AddListener(OnRestartClicked);
         if (mainMenuButton != null) mainMenuButton.onClick.AddListener(OnMainMenuClicked);
-        if (submitButton != null) submitButton.onClick.AddListener(OnSubmitClicked);
+        if (submitButton != null) submitButton.onClick.AddListener(OnUpdateNameClicked);
     }
 
     public void Show(int finalScore)
@@ -51,39 +51,58 @@ public class GameOverUI : MonoBehaviour
         {
             string saved = PlayerPrefs.GetString("leaderboard_player_name", string.Empty);
             nameInputField.text = string.IsNullOrEmpty(saved) ? string.Empty : saved;
-            nameInputField.onSubmit.AddListener(_ => OnSubmitClicked());
+            nameInputField.onSubmit.AddListener(_ => OnUpdateNameClicked());
         }
 
         if (submitStatusText != null) submitStatusText.text = string.Empty;
-        if (submitButton != null) submitButton.interactable = true;
+        if (submitButton != null) submitButton.interactable = false;
 
         if (panel != null) panel.SetActive(true);
         Time.timeScale = 0f;
+
+        if (leaderboardConfig != null)
+            _ = AutoSubmitScoreAsync();
     }
 
-    private async void OnSubmitClicked()
+    private async Task AutoSubmitScoreAsync()
     {
-        if (leaderboardConfig == null) return;
-
-        string raw = nameInputField != null ? nameInputField.text.Trim() : string.Empty;
-        string name = string.IsNullOrWhiteSpace(raw) ? "Player" : raw;
-
-        if (submitButton != null) submitButton.interactable = false;
-        if (submitStatusText != null) submitStatusText.text = "Submitting...";
+        if (submitStatusText != null) submitStatusText.text = "Saving score...";
 
         try
         {
             await LeaderboardClient.EnsureInitializedAsync(leaderboardConfig);
-            await LeaderboardClient.SubmitNameAsync(name);
             await LeaderboardClient.SubmitScoreAsync(pendingScore, pendingTime);
             scoreSubmitted = true;
 
-            if (submitStatusText != null) submitStatusText.text = "Score submitted!";
+            if (submitStatusText != null) submitStatusText.text = "Score saved! Enter your name:";
+            if (submitButton != null) submitButton.interactable = true;
         }
         catch (Exception e)
         {
-            Debug.LogWarning($"[GameOver] Submit failed: {e.Message}");
-            if (submitStatusText != null) submitStatusText.text = "Submit failed. Try again.";
+            Debug.LogWarning($"[GameOver] Auto-submit failed: {e.Message}");
+            if (submitStatusText != null) submitStatusText.text = "Score save failed.";
+        }
+    }
+
+    private async void OnUpdateNameClicked()
+    {
+        if (!scoreSubmitted || leaderboardConfig == null) return;
+
+        string raw = nameInputField != null ? nameInputField.text.Trim() : string.Empty;
+        if (string.IsNullOrWhiteSpace(raw)) return;
+
+        if (submitButton != null) submitButton.interactable = false;
+        if (submitStatusText != null) submitStatusText.text = "Updating name...";
+
+        try
+        {
+            await LeaderboardClient.SubmitNameAsync(raw);
+            if (submitStatusText != null) submitStatusText.text = "Name updated!";
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning($"[GameOver] Name update failed: {e.Message}");
+            if (submitStatusText != null) submitStatusText.text = "Name update failed.";
             if (submitButton != null) submitButton.interactable = true;
         }
     }
