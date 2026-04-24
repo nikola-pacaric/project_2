@@ -106,7 +106,7 @@
 #### 5a. Dashboard provisioning (korisnik radi sam na cloud.unity.com — Claude ne može login)
 - [x] Signup/login na **cloud.unity.com** (isti Unity ID kao Editor)
 - [x] Kreirati ili link-ovati Unity Cloud Project sa lokalnim Unity Editor projektom
-- [ ] Enable **Authentication** servis + turn on **Anonymous** identity provider
+- [x] Enable **Authentication** servis + turn on **Anonymous** identity provider
 - [x] Enable **Leaderboards** servis
 - [x] Create leaderboard:
   - ID: `main_scores`
@@ -143,15 +143,15 @@ UGS Leaderboards auto-genericka šema:
   - `SubmitNameAsync(name)` — `AuthenticationService.Instance.UpdatePlayerNameAsync(name)` (globalno per-player ime, vidljivo u svim leaderboardima)
   - `FetchTopNAsync(limit)` — `LeaderboardsService.Instance.GetScoresAsync(id, new GetScoresOptions { Limit = limit })`
 - [x] `SessionTracker.cs` — trackuje `timePlayed` preko `Time.unscaledTime` delta (pauza ne broji). Nema više GUID-a (UGS auto-hendluje identitet).
-- [ ] Name display fallback: empty/null `playerName` → render kao "Player"
-- [ ] Time format helper: seconds → `mm:ss`
+- [x] Name display fallback: empty/null `playerName` → render kao "Player"
+- [x] Time format helper: seconds → `mm:ss`
 
 #### 5e. Integration points
-- [ ] Start Screen `Awake()` → `LeaderboardClient.InitializeAsync()` (zamenjuje stari Warmup ping — ovo je stvarna UGS inicijalizacija + anonimni sign-in)
-- [ ] Start Screen Leaderboard dugme → `FetchTopNAsync(50)` → populate UI listu (playerName, score, timePlayed mm:ss)
-- [ ] Play dugme → `SessionTracker.StartSession()` (reset timer) → load gameplay scene
-- [ ] `GameOverUI.Show()` → `SubmitScoreAsync(score, timePlayed)` fire-and-forget. KeepBest server-side → ne treba client-side poređenje.
-- [ ] Name input Submit → `SubmitNameAsync(name)`; Skip → zatvori (ime ostaje prazno → UI prikazuje "Player")
+- [x] Start Screen `Awake()` → `LeaderboardClient.InitializeAsync()` (zamenjuje stari Warmup ping — ovo je stvarna UGS inicijalizacija + anonimni sign-in)
+- [x] Start Screen Leaderboard dugme → `FetchTopNAsync(50)` → populate UI listu (playerName, score, timePlayed mm:ss)
+- [x] Play dugme → `SessionTracker.StartSession()` (reset timer) → load gameplay scene
+- [x] `GameOverUI.Show()` → `SubmitScoreAsync(score, timePlayed)` fire-and-forget. KeepBest server-side → ne treba client-side poređenje.
+- [x] Name input Submit → `SubmitNameAsync(name)`; Skip → zatvori (ime ostaje prazno → UI prikazuje "Player")
 
 #### 5f. WebGL compatibility
 - [ ] UGS podržava WebGL out-of-the-box; nema CORS setup (SDK priča sa `*.services.api.unity.com`, Unity hendluje)
@@ -182,16 +182,16 @@ UGS Leaderboards auto-genericka šema:
 
 ### Migration steps (incremental — one enemy at a time, old + new coexist during transition)
 
-- [ ] Create `Assets/Scripts/Combat/` — `DamageInfo.cs`, `Hitbox.cs`, `Hurtbox.cs`, `Health.cs`
-- [ ] Migrate `PlayerHealth` → `Health` on Player. Port `TakeEnemyDamage` / `TakeSpikeDamage` callers to fire through a player-contact Hitbox instead.
-- [ ] Replace player's Stomp behaviour: add child `Hitbox` at feet, active while `rb.linearVelocity.y < 0`. Delete the `OnTriggerEnter2D("Stomp")` path in `PlayerController`.
-- [ ] Replace player's Slash: `PlayerCombat` activates a child `Hitbox` during the slash anim window, deactivates after. Delete current slash damage dispatch.
-- [ ] Delete the `OnCollisionEnter2D` contact-damage block in `PlayerController` and the slide-hit damage path in `FixedUpdate`. Player damage is now ONLY Hurtbox-driven.
-- [ ] Migrate enemies one prefab at a time: `Enemy_Frog` → `Enemy_Eagle` → `Mushroom_Enemy` → snake/lizard/opossum. Each gets Hurtbox (body) + contact Hitbox (body, disabled during hitstun). Remove `Stomp_Box` child trigger — redundant.
-- [ ] `EnemyHealth` → `Health`. Move the 0.15s i-frame logic into `Health` so player and enemies share the same invulnerability model.
-- [ ] Subscribe existing systems to `Health.OnDamaged`: AudioManager SFX (`SfxId.Hit`, `SfxId.Stomp`, `SfxId.EnemyDeath`), knockback (`LockMovement`), GameManager score on death, flash VFX.
-- [ ] Remove now-unused tags (`Stomp`, possibly `Enemy` if no other systems check it). Audit `CompareTag` callsites.
-- [ ] Layer audit: use Physics2D layer collision matrix so Hitbox-vs-Hurtbox only fires between valid pairs (player-hitbox ↔ enemy-hurtbox, enemy-hitbox ↔ player-hurtbox). Prevents enemy-vs-enemy friendly fire accidentally.
+- [x] Create `Assets/Scripts/Combat/` — `DamageInfo.cs`, `Hitbox.cs`, `Hurtbox.cs`, `Health.cs`
+- [x] Migrate `PlayerHealth` → `Health` on Player. Port `TakeEnemyDamage` / `TakeSpikeDamage` callers to fire through a player-contact Hitbox instead.
+- [x] Replace player's Stomp behaviour: add child `Hitbox` at feet, active while `rb.linearVelocity.y < 0`. Delete the `OnTriggerEnter2D("Stomp")` path in `PlayerController`.
+- [x] Replace player's Slash: `PlayerCombat` activates a child `Hitbox` during the slash anim window, deactivates after. Delete current slash damage dispatch.
+- [x] Delete the `OnCollisionEnter2D` contact-damage block in `PlayerController` and the slide-hit damage path in `FixedUpdate`. Player damage is now ONLY Hurtbox-driven.
+- [x] Migrate enemies one prefab at a time: `Enemy_Frog` → `Enemy_Eagle` → `Mushroom_Enemy` → snake/lizard/opossum. Each gets Hurtbox (body) + contact Hitbox (body, disabled during hitstun). Remove `Stomp_Box` child trigger — redundant.
+- [x] `EnemyHealth` → `Health`. Move the 0.15s i-frame logic into `Health` so player and enemies share the same invulnerability model.
+- [x] Subscribe existing systems to `Health.OnDamaged`: AudioManager SFX (`SfxId.Hit`, `SfxId.Stomp`, `SfxId.EnemyDeath`), knockback (`LockMovement`), GameManager score on death, flash VFX.
+- [x] Remove now-unused tags (`Stomp`, possibly `Enemy` if no other systems check it). Audit `CompareTag` callsites.
+- [x] Layer audit: use Physics2D layer collision matrix so Hitbox-vs-Hurtbox only fires between valid pairs (player-hitbox ↔ enemy-hurtbox, enemy-hitbox ↔ player-hurtbox). Prevents enemy-vs-enemy friendly fire accidentally.
 
 ### Success criteria
 
@@ -232,6 +232,24 @@ UGS Leaderboards auto-genericka šema:
 - [ ] Boss Dragon fight (breath attack, faze, death)
 - [ ] Boss tema muzika
 - [ ] Victory / end level state
+
+### Maybe — Offline leaderboard fallback
+
+**Status:** deferred. Considered during main-menu polish, postponed. Add only if players actually report losing offline runs.
+
+**Idea:** If UGS init fails at Main Menu Awake, route leaderboard ops to a local JSON file instead of erroring out. No sync, no merge — strictly a fallback so offline players still see their own scores.
+
+**Design outline (when/if we build it):**
+- One online/offline decision per session, fixed at Main Menu Awake (`LeaderboardClient.IsOnline`)
+- `LocalLeaderboardStore.cs` — reads/writes `Application.persistentDataPath/offline_leaderboard.json`, top-50 cap, sorted desc by score
+- `LeaderboardClient.SubmitScoreAsync` / `FetchTopNAsync` internally route on `IsOnline` — callers unchanged
+- Local name source: existing `PLAYER_NAME_PREF_KEY` in PlayerPrefs, fallback `"Player"`
+- Optional UI hint: small "Offline mode" label on LeaderboardPanel when `!IsOnline`
+
+**Caveats that made us defer:**
+- WebGL persistentDataPath = IndexedDB per browser per origin → different browsers see different local lists; incognito wipes on close
+- Adds a second code path to test + maintain for an edge case (player opens GitHub Pages build with no internet)
+- Global UGS leaderboard already works on WebGL over HTTPS for the 99% of players with internet
 
 ---
 

@@ -49,8 +49,7 @@ public class GameOverUI : MonoBehaviour
 
         if (nameInputField != null)
         {
-            string saved = PlayerPrefs.GetString("leaderboard_player_name", string.Empty);
-            nameInputField.text = string.IsNullOrEmpty(saved) ? string.Empty : saved;
+            nameInputField.text = string.Empty;
             nameInputField.onSubmit.AddListener(_ => OnUpdateNameClicked());
         }
 
@@ -107,9 +106,24 @@ public class GameOverUI : MonoBehaviour
         }
     }
 
-    private void OnRestartClicked()
+    private async void OnRestartClicked()
     {
         Time.timeScale = 1f;
+        if (restartButton != null) restartButton.interactable = false;
+
+        if (leaderboardConfig != null)
+        {
+            try
+            {
+                await LeaderboardClient.EnsureInitializedAsync(leaderboardConfig);
+                await LeaderboardClient.StartNewRunIdentityAsync();
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[GameOver] New run identity failed (proceeding anyway): {e.Message}");
+            }
+        }
+
         if (GameManager.Instance != null) GameManager.Instance.ResetRun();
         SceneManager.LoadScene(arc1SceneName);
     }

@@ -1,83 +1,81 @@
 using System.Collections.Generic;
-using System.Text;
 using TMPro;
 using UnityEngine;
 
 public class LeaderboardView : MonoBehaviour
 {
-    [SerializeField] private TMP_Text headerText;
-    [SerializeField] private TMP_Text textArea;
+    [Header("Header (optional, shown only when rows are populated)")]
+    [SerializeField] private GameObject headerGroup;
+
+    [Header("Row list")]
+    [SerializeField] private LeaderboardRowUI rowPrefab;
+    [SerializeField] private RectTransform contentRoot;
+
+    [Header("Status")]
     [SerializeField] private TMP_Text statusText;
 
-    // Adjust in Inspector to match your font size (em units force monospace per character)
-    [SerializeField] private float charWidthEm = 0.62f;
-
-    private const string HEADER_FORMAT = " #   {0,-16}  {1,5}   {2}";
-    private const int NAME_WIDTH = 16;
+    private readonly List<LeaderboardRowUI> spawnedRows = new List<LeaderboardRowUI>();
 
     public void ShowLoading()
     {
+        ClearRows();
         SetHeaderVisible(false);
-        if (textArea != null) textArea.text = string.Empty;
-        if (statusText != null) statusText.text = "Loading...";
+        SetStatus("Loading...");
     }
 
     public void ShowError(string message)
     {
+        ClearRows();
         SetHeaderVisible(false);
-        if (textArea != null) textArea.text = string.Empty;
-        if (statusText != null) statusText.text = message;
+        SetStatus(message);
     }
 
     public void Populate(List<LeaderboardRow> rows)
     {
-        if (statusText != null) statusText.text = string.Empty;
-        if (textArea == null) return;
+        ClearRows();
 
         if (rows == null || rows.Count == 0)
         {
             SetHeaderVisible(false);
-            textArea.text = "No scores yet.";
+            SetStatus("No scores yet.");
+            return;
+        }
+
+        if (rowPrefab == null || contentRoot == null)
+        {
+            Debug.LogWarning("[LeaderboardView] rowPrefab or contentRoot not assigned.");
             return;
         }
 
         SetHeaderVisible(true);
+        SetStatus(string.Empty);
 
-        string mOpen = $"<mspace={charWidthEm}em>";
-        const string mClose = "</mspace>";
-
-        StringBuilder sb = new StringBuilder(rows.Count * 50);
-        sb.Append(mOpen);
         foreach (LeaderboardRow row in rows)
         {
-            sb.Append(row.Rank.ToString().PadLeft(2));
-            sb.Append(".  ");
-            sb.Append(TruncateName(row.PlayerName, NAME_WIDTH).PadRight(NAME_WIDTH));
-            sb.Append("  ");
-            sb.Append(row.Score.ToString().PadLeft(6));
-            sb.Append("  ");
-            sb.AppendLine(LeaderboardClient.FormatTime(row.TimePlayed));
+            LeaderboardRowUI rowUI = Instantiate(rowPrefab, contentRoot);
+            rowUI.Bind(row);
+            spawnedRows.Add(rowUI);
         }
-        sb.Append(mClose);
-        textArea.text = sb.ToString();
+    }
+
+    private void ClearRows()
+    {
+        for (int i = 0; i < spawnedRows.Count; i++)
+        {
+            if (spawnedRows[i] != null) Destroy(spawnedRows[i].gameObject);
+        }
+        spawnedRows.Clear();
     }
 
     private void SetHeaderVisible(bool visible)
     {
-        if (headerText == null) return;
-        headerText.gameObject.SetActive(visible);
-        if (!visible) return;
-
-        string mOpen = $"<mspace={charWidthEm}em>";
-        const string mClose = "</mspace>";
-        headerText.text = mOpen
-            + string.Format(HEADER_FORMAT, "NAME", "SCORE", "TIME")
-            + mClose;
+        if (headerGroup != null) headerGroup.SetActive(visible);
     }
 
-    private static string TruncateName(string name, int maxLen)
+    private void SetStatus(string message)
     {
-        if (string.IsNullOrEmpty(name)) return string.Empty;
-        return name.Length <= maxLen ? name : name.Substring(0, maxLen);
+        if (statusText == null) return;
+        statusText.text = message;
+        statusText.gameObject.SetActive(!string.IsNullOrEmpty(message));
     }
 }

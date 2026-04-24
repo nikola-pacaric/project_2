@@ -12,7 +12,6 @@ using UnityEngine;
 public static class LeaderboardClient
 {
     private const string DEFAULT_DISPLAY_NAME = "Player";
-    private const string PLAYER_NAME_PREF_KEY = "leaderboard_player_name";
 
     private static LeaderboardConfig config;
     private static Task initializeTask;
@@ -103,6 +102,19 @@ public static class LeaderboardClient
     public static async Task SubmitScoreAsync(int score, double timePlayed)
     {
         EnsureReady();
+
+        if (string.IsNullOrEmpty(AuthenticationService.Instance.PlayerName))
+        {
+            try
+            {
+                await AuthenticationService.Instance.UpdatePlayerNameAsync(DEFAULT_DISPLAY_NAME);
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[Leaderboard] Failed to set default player name: {e.Message}");
+            }
+        }
+
         var metadata = new Dictionary<string, object>
         {
             { "timePlayed", Math.Round(timePlayed, 2) }
@@ -116,8 +128,6 @@ public static class LeaderboardClient
         EnsureReady();
         if (string.IsNullOrWhiteSpace(name)) return;
         await AuthenticationService.Instance.UpdatePlayerNameAsync(name);
-        PlayerPrefs.SetString(PLAYER_NAME_PREF_KEY, name);
-        PlayerPrefs.Save();
     }
 
     public static async Task StartNewRunIdentityAsync()
@@ -139,19 +149,6 @@ public static class LeaderboardClient
         Debug.Log($"[Leaderboard] New run identity. PlayerId: {AuthenticationService.Instance.PlayerId}");
 
         initialized = true;
-
-        string savedName = PlayerPrefs.GetString(PLAYER_NAME_PREF_KEY, string.Empty);
-        if (!string.IsNullOrWhiteSpace(savedName))
-        {
-            try
-            {
-                await AuthenticationService.Instance.UpdatePlayerNameAsync(savedName);
-            }
-            catch (Exception e)
-            {
-                Debug.LogWarning($"[Leaderboard] Failed to re-apply saved player name: {e.Message}");
-            }
-        }
     }
 
     public static async Task<List<LeaderboardRow>> FetchTopNAsync(int? limit = null)
