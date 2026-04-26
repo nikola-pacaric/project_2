@@ -95,7 +95,7 @@
 - [x] **Pause Menu** — `Time.timeScale = 0`, Resume / Restart / Quit to Menu
   - Disable input actions selectively dok je pauzirano
 - [x] Game Over Screen (already done)
-- [ ] Proširiti Game Over Screen: name input field + Submit/Skip dugmad (v. 5e)
+- [x] Proširiti Game Over Screen: name input field + Submit/Skip dugmad (v. 5e)
 
 ### 5. Leaderboard — Unity Gaming Services (UGS)
 
@@ -154,8 +154,8 @@ UGS Leaderboards auto-genericka šema:
 - [x] Name input Submit → `SubmitNameAsync(name)`; Skip → zatvori (ime ostaje prazno → UI prikazuje "Player")
 
 #### 5f. WebGL compatibility
-- [ ] UGS podržava WebGL out-of-the-box; nema CORS setup (SDK priča sa `*.services.api.unity.com`, Unity hendluje)
-- [ ] `InitializeAsync` okružiti try/catch — failed init (offline) ne sme da sruši Start Screen; Leaderboard dugme u tom slučaju prikaže "Offline"
+- [x] UGS podržava WebGL out-of-the-box; nema CORS setup (SDK priča sa `*.services.api.unity.com`, Unity hendluje)
+- [x] `InitializeAsync` okružiti try/catch — failed init (offline) ne sme da sruši Start Screen; Leaderboard dugme u tom slučaju prikaže "Offline"
 
 ### 6. Deploy — WebGL + GitHub Pages
 - [ ] Unity WebGL build settings: Brotli compression, default ili minimalni custom template

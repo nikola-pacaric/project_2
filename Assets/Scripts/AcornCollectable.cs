@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class CherryCollectable : MonoBehaviour
+public class AcornCollectable : MonoBehaviour
 {
     [SerializeField] private int scoreValue = 10;
     [SerializeField] private float bobSpeed = 2f;
@@ -53,7 +53,7 @@ public class CherryCollectable : MonoBehaviour
         }
     }
 
-    public void DestroyCherry()
+    public void DestroyAcorn()
     {
         Destroy(gameObject);
     }

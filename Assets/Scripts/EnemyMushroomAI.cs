@@ -16,6 +16,7 @@ public class EnemyMushroomAI : MonoBehaviour
 
     [Header("Detection")]
     [SerializeField] private float detectionRange = 6f;
+    [SerializeField] private float verticalTolerance = 1.5f;
 
     [Header("Attack")]
     [SerializeField] private GameObject gasCloudPrefab;
@@ -68,9 +69,16 @@ public class EnemyMushroomAI : MonoBehaviour
         rb.linearVelocity = new Vector2(moveDir * moveSpeed, rb.linearVelocity.y);
         transform.localScale = new Vector3(moveDir, 1f, 1f);
 
-        if (playerTransform != null &&
-            Vector2.Distance(transform.position, playerTransform.position) <= detectionRange)
+        if (playerTransform != null && PlayerInSightLine())
             StartCoroutine(AttackSequence());
+    }
+
+    private bool PlayerInSightLine()
+    {
+        if (playerTransform == null) return false;
+        float dx = Mathf.Abs(playerTransform.position.x - transform.position.x);
+        float dy = Mathf.Abs(playerTransform.position.y - transform.position.y);
+        return dx <= detectionRange && dy <= verticalTolerance;
     }
 
     private IEnumerator AttackSequence()
@@ -107,8 +115,7 @@ public class EnemyMushroomAI : MonoBehaviour
             // Wait for attack clip to finish
             yield return new WaitForSeconds(attackFinish);
         }
-        while (playerTransform != null &&
-               Vector2.Distance(transform.position, playerTransform.position) <= detectionRange);
+        while (PlayerInSightLine());
 
         anim.SetBool("isShooting", false);
         isAttacking = false;
@@ -151,8 +158,21 @@ public class EnemyMushroomAI : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
+        // Detection band (magenta)
+        Gizmos.color = Color.magenta;
+        Vector3 size = new Vector3(detectionRange * 2f, verticalTolerance * 2f, 0f);
+        Gizmos.DrawWireCube(transform.position, size);
+
+        // Patrol range (yellow) — visible in edit mode
+        Vector3 originPos = Application.isPlaying
+            ? new Vector3((leftX + rightX) * 0.5f, transform.position.y, 0f)
+            : transform.position;
+        Vector3 leftEnd = new Vector3(originPos.x - patrolDistance, originPos.y, 0f);
+        Vector3 rightEnd = new Vector3(originPos.x + patrolDistance, originPos.y, 0f);
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, detectionRange);
+        Gizmos.DrawLine(leftEnd, rightEnd);
+        Gizmos.DrawWireSphere(leftEnd, 0.15f);
+        Gizmos.DrawWireSphere(rightEnd, 0.15f);
 
         Gizmos.color = Color.red;
         Gizmos.DrawRay(transform.position - Vector3.up * 0.4f, Vector3.right * moveDir * wallCheckDist);

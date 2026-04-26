@@ -208,6 +208,7 @@ MonoBehaviour:
   ledgeCheckHeightOffset: 0.3
   ledgeCheckDepth: 0.8
   detectionRange: 7
+  verticalTolerance: 1
   gasCloudPrefab: {fileID: 484177558917367482, guid: 54ce8c67981af474b895f6b56f1bbfdd, type: 3}
   mouthPoint: {fileID: 14354553416841655}
   firstAttackDelay: 0.5

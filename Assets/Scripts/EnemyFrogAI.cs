@@ -79,7 +79,9 @@ public class EnemyFrogAI : MonoBehaviour
         isActing = true;
 
         float direction = (targetX > transform.position.x) ? 1 : -1;
-        rb.linearVelocity = new Vector2(direction * jumpForward, jumpHeight);
+        float remaining = Mathf.Abs(targetX - transform.position.x);
+        float horizSpeed = Mathf.Min(jumpForward, remaining);
+        rb.linearVelocity = new Vector2(direction * horizSpeed, jumpHeight);
         anim.SetTrigger("frog_jumps");
         AudioManager.Instance?.PlaySFXAt(SfxId.EnemyFrogJump, transform.position);
 
@@ -131,6 +133,17 @@ public class EnemyFrogAI : MonoBehaviour
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
         }
+
+        // Patrol range (yellow) — visible in edit mode
+        Vector3 originPos = Application.isPlaying
+            ? new Vector3((leftX + rightX) * 0.5f, transform.position.y, 0f)
+            : transform.position;
+        Vector3 leftEnd = new Vector3(originPos.x - patrolDistance, originPos.y, 0f);
+        Vector3 rightEnd = new Vector3(originPos.x + patrolDistance, originPos.y, 0f);
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawLine(leftEnd, rightEnd);
+        Gizmos.DrawWireSphere(leftEnd, 0.15f);
+        Gizmos.DrawWireSphere(rightEnd, 0.15f);
 
         if (!Application.isPlaying) return;
 

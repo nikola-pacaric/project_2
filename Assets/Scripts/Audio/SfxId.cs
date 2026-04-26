@@ -6,7 +6,7 @@ public enum SfxId
     Hit,
     PlayerDeath,
     DiamondPickup,
-    CherryPickup,
+    CommonPickup,
     Checkpoint,
     EnemyFrogJump,
     EnemyFrogTaunt,
