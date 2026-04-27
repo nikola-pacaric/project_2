@@ -247,8 +247,8 @@ public class PlayerController : MonoBehaviour
         if (stompHitbox == null) return;
         // Active whenever falling in-air. Hurtbox placement on stompable enemies
         // decides whether the stomp lands; shape, not code, gates stompability.
-        bool falling = !isGrounded && rb != null && rb.linearVelocity.y < 0f;
-        stompHitbox.SetActive(falling);
+        bool stompable = !isGrounded && rb != null && rb.linearVelocity.y <= 0.01f;
+        stompHitbox.SetActive(stompable);
     }
 
     private void HandleStompLanded(Hurtbox target)

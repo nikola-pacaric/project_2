@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
@@ -24,6 +25,7 @@ public class AudioManager : MonoBehaviour
 
     private AudioSource musicSource;
     private readonly List<AudioSource> sfxPool = new();
+    private Coroutine musicFadeRoutine;
 
     private const float MIN_VOLUME_DB = -80f;
     private const float SILENCE_THRESHOLD = 0.0001f;
@@ -111,6 +113,36 @@ public class AudioManager : MonoBehaviour
     public void StopMusic()
     {
         if (musicSource != null) musicSource.Stop();
+    }
+
+    public void FadeOutMusic(float duration)
+    {
+        if (musicSource == null) return;
+        if (musicFadeRoutine != null) StopCoroutine(musicFadeRoutine);
+        musicFadeRoutine = StartCoroutine(FadeOutMusicRoutine(duration));
+    }
+
+    private IEnumerator FadeOutMusicRoutine(float duration)
+    {
+        if (duration <= 0f)
+        {
+            musicSource.volume = 0f;
+            musicSource.Stop();
+            musicFadeRoutine = null;
+            yield break;
+        }
+
+        float startVolume = musicSource.volume;
+        float t = 0f;
+        while (t < duration)
+        {
+            t += Time.unscaledDeltaTime;
+            musicSource.volume = Mathf.Lerp(startVolume, 0f, t / duration);
+            yield return null;
+        }
+        musicSource.volume = 0f;
+        musicSource.Stop();
+        musicFadeRoutine = null;
     }
 
     public void SetVolume(AudioChannel channel, float normalized)
