@@ -67,6 +67,7 @@ public class GameManager : MonoBehaviour
     {
         ResetScore();
         ClearSavedState();
+        Checkpoint.ResetLastHealed();
         if (RunTimer.Instance != null) RunTimer.Instance.StartRun();
     }
 

@@ -36,6 +36,7 @@ public class PlayerHealth : MonoBehaviour
     private Rigidbody2D rb;
     private Animator anim;
     private bool isDead;
+    private int previousHP;
 
     private void Awake()
     {
@@ -64,17 +65,39 @@ public class PlayerHealth : MonoBehaviour
     private void Start()
     {
         respawnPoint = transform.position;
+        previousHP = health.CurrentHP;
         OnHealthChanged?.Invoke();
     }
 
-    private void HandleHPChanged() => OnHealthChanged?.Invoke();
+    private void HandleHPChanged()
+    {
+        previousHP = health.CurrentHP;
+        OnHealthChanged?.Invoke();
+    }
 
     private void HandleDamaged(DamageInfo info)
     {
         AudioManager.Instance?.PlaySFX(SfxId.Hit);
+
+        int oldHearts = Mathf.CeilToInt((float)previousHP / segmentsPerHeartValue);
+        int newHearts = Mathf.CeilToInt((float)health.CurrentHP / segmentsPerHeartValue);
+
+        if (newHearts < oldHearts && health.CurrentHP > 0)
+        {
+            RespawnAtCheckpoint();
+            return;
+        }
+
         StartCoroutine(FlashRed());
         if (anim != null) anim.SetTrigger("isHurt");
         ApplyKnockback(info);
+    }
+
+    private void RespawnAtCheckpoint()
+    {
+        if (rb != null) rb.linearVelocity = Vector2.zero;
+        transform.position = respawnPoint;
+        if (pc != null) pc.LockMovement(0.1f);
     }
 
     private IEnumerator FlashRed()
@@ -122,7 +145,8 @@ public class PlayerHealth : MonoBehaviour
 
     public void GainHeart()
     {
-        health.SetMaxHP(health.MaxHP + segmentsPerHeartValue, refill: true);
+        health.SetMaxHP(health.MaxHP + segmentsPerHeartValue, refill: false);
+        health.Heal(segmentsPerHeartValue);
     }
 
     public void RespawnAfterFall()
