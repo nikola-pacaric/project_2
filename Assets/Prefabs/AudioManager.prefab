@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 4574172325703803744}
   - component: {fileID: 2744912089719031851}
   - component: {fileID: 103882904002352418}
-  - component: {fileID: 2773918529497325142}
   m_Layer: 0
   m_Name: AudioManager
   m_TagString: Untagged
@@ -57,20 +56,6 @@ MonoBehaviour:
   uiVolumeParam: UiVolume
   sfxVoiceCount: 8
 --- !u!114 &103882904002352418
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 850451006222414232}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8ff0f89e84331fe44b773c849c982c24, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SceneMusicPlayer
-  track: 0
-  playOnStart: 1
---- !u!114 &2773918529497325142
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

@@ -7,8 +7,6 @@ public class ParallaxLayers : MonoBehaviour
     [SerializeField] private float parallaxFactor = 0.5f;
     [SerializeField] private float offsetY = 0f;
 
-    private Camera _cam;
-    private float _baseOrthoSize;
     private float _baseLength;
     private float _posX;
     private float _prevCamX;
@@ -17,8 +15,6 @@ public class ParallaxLayers : MonoBehaviour
     {
         _posX = transform.position.x;
         _prevCamX = cameraTransform.position.x;
-        _cam = cameraTransform.GetComponent<Camera>();
-        _baseOrthoSize = _cam.orthographicSize;
         _baseLength = GetComponent<SpriteRenderer>().bounds.size.x;
     }
 
@@ -28,17 +24,11 @@ public class ParallaxLayers : MonoBehaviour
         _prevCamX = cameraTransform.position.x;
         _posX += dx * parallaxFactor;
 
-        // Scale uniformly to always fill the screen regardless of zoom level
-        float scale = _cam.orthographicSize / _baseOrthoSize;
-        transform.localScale = new Vector3(scale, scale, 1f);
-
-        // Y always locked to camera — never drifts out vertically
         transform.position = new Vector3(_posX, cameraTransform.position.y + offsetY, transform.position.z);
 
-        // Infinite horizontal tiling — account for current scale
-        float length = _baseLength * scale;
+        // Infinite horizontal tiling
         float relX = cameraTransform.position.x - _posX;
-        if (relX > length)       _posX += length;
-        else if (relX < -length) _posX -= length;
+        if (relX > _baseLength)       _posX += _baseLength;
+        else if (relX < -_baseLength) _posX -= _baseLength;
     }
 }

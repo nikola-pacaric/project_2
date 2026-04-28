@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -20,6 +22,7 @@ public class MainMenu : MonoBehaviour
 
     [Header("Scenes")]
     [SerializeField] private string arc1SceneName = "Arc_1";
+    [SerializeField] private float fadeDuration = 0.5f;
 
     [Header("Leaderboard")]
     [SerializeField] private LeaderboardConfig leaderboardConfig;
@@ -36,7 +39,6 @@ public class MainMenu : MonoBehaviour
 
         ShowMainPanel();
         Time.timeScale = 1f;
-        AudioManager.Instance?.StopMusic();
 
         if (leaderboardConfig != null)
         {
@@ -56,6 +58,8 @@ public class MainMenu : MonoBehaviour
     {
         if (playButton != null) playButton.interactable = false;
 
+        Task fadeTask = StartFadeOutTask();
+
         if (leaderboardConfig != null)
         {
             try
@@ -71,7 +75,31 @@ public class MainMenu : MonoBehaviour
 
         if (GameManager.Instance != null) GameManager.Instance.ResetRun();
         else if (RunTimer.Instance != null) RunTimer.Instance.StartRun();
+
+        await fadeTask;
+
+        SceneManager.sceneLoaded += FadeInOnLoaded;
         SceneManager.LoadScene(arc1SceneName);
+    }
+
+    private Task StartFadeOutTask()
+    {
+        if (ScreenFader.Instance == null) return Task.CompletedTask;
+        TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
+        StartCoroutine(FadeOutRoutine(tcs));
+        return tcs.Task;
+    }
+
+    private IEnumerator FadeOutRoutine(TaskCompletionSource<bool> tcs)
+    {
+        yield return ScreenFader.Instance.FadeOut(fadeDuration);
+        tcs.SetResult(true);
+    }
+
+    private static void FadeInOnLoaded(Scene scene, LoadSceneMode mode)
+    {
+        SceneManager.sceneLoaded -= FadeInOnLoaded;
+        if (ScreenFader.Instance != null) ScreenFader.Instance.FadeIn();
     }
 
     private void OpenSettings()

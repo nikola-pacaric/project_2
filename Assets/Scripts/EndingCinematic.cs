@@ -2,6 +2,7 @@ using System.Collections;
 using TMPro;
 using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 [RequireComponent(typeof(Collider2D))]
 public class EndingCinematic : MonoBehaviour
@@ -76,6 +77,12 @@ public class EndingCinematic : MonoBehaviour
             vcam.Follow = null;
             vcam.LookAt = null;
         }
+
+        // PixelPerfectCamera locks ortho size every frame; disable it for the
+        // duration of the cinematic so the smooth zoom/pan can take effect.
+        Camera mainCam = Camera.main;
+        if (mainCam != null && mainCam.TryGetComponent<PixelPerfectCamera>(out PixelPerfectCamera ppc))
+            ppc.enabled = false;
 
         AudioManager.Instance?.FadeOutMusic(musicFadeDuration);
 

@@ -238,8 +238,8 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: -0.0019865702, y: 0.44264898}
-  m_Size: {x: 1.4667562, y: 0.80370814}
+  m_Offset: {x: -0.006064603, y: 0.42905533}
+  m_Size: {x: 1.3661693, y: 0.7330293}
   m_Direction: 1
 --- !u!114 &2664956178783871831
 MonoBehaviour:
@@ -457,7 +457,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.0041885376, y: 0.040826797}
+  m_Offset: {x: 0.0069065094, y: 0.047623277}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -467,7 +467,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1.4396744, y: 0.9183464}
+  m_Size: {x: 1.4233665, y: 0.93193936}
   m_EdgeRadius: 0
 --- !u!114 &8683490625596501651
 MonoBehaviour:
@@ -482,3 +482,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Hurtbox
   health: {fileID: 0}
+  bouncyOnly: 0
