@@ -1777,12 +1777,12 @@ MonoBehaviour:
         - m_Target: {fileID: 1751085238}
           m_TargetAssemblyTypeName: CameraZoomHelper, Assembly-CSharp
           m_MethodName: SetZoom
-          m_Mode: 4
+          m_Mode: 3
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
             m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 9
+            m_IntArgument: 2
+            m_FloatArgument: 8.4375
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
@@ -2201,11 +2201,11 @@ MonoBehaviour:
         - m_Target: {fileID: 1751085238}
           m_TargetAssemblyTypeName: CameraZoomHelper, Assembly-CSharp
           m_MethodName: SetZoom
-          m_Mode: 4
+          m_Mode: 3
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
             m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
+            m_IntArgument: 3
             m_FloatArgument: 7
             m_StringArgument: 
             m_BoolArgument: 0
@@ -3530,12 +3530,12 @@ MonoBehaviour:
         - m_Target: {fileID: 1751085238}
           m_TargetAssemblyTypeName: CameraZoomHelper, Assembly-CSharp
           m_MethodName: SetZoom
-          m_Mode: 4
+          m_Mode: 3
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
             m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 7
+            m_IntArgument: 3
+            m_FloatArgument: 3
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
@@ -4072,7 +4072,7 @@ TilemapRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_ChunkSize: {x: 32, y: 32, z: 32}
-  m_ChunkCullingBounds: {x: 2.0624986, y: 3.0619376, z: 0}
+  m_ChunkCullingBounds: {x: 2.0624986, y: 3.0624986, z: 0}
   m_MaxChunkCount: 16
   m_MaxFrameAge: 16
   m_SortOrder: 0
@@ -38998,10 +38998,6 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 2469849072342075955, guid: 5bee71aa8b904fc4abaa2d62a66c7ed6, type: 3}
-      propertyPath: Lens.OrthographicSize
-      value: 8.4375
-      objectReference: {fileID: 0}
-    - target: {fileID: 2469849072342075955, guid: 5bee71aa8b904fc4abaa2d62a66c7ed6, type: 3}
       propertyPath: Target.TrackingTarget
       value: 
       objectReference: {fileID: 1627345787}
@@ -41942,7 +41938,7 @@ TilemapRenderer:
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_ChunkSize: {x: 32, y: 32, z: 32}
-  m_ChunkCullingBounds: {x: 2.0625, y: 3.0619376, z: 0}
+  m_ChunkCullingBounds: {x: 2.0625, y: 3.0624986, z: 0}
   m_MaxChunkCount: 16
   m_MaxFrameAge: 16
   m_SortOrder: 0
@@ -42068,7 +42064,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2930120077512442830}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0

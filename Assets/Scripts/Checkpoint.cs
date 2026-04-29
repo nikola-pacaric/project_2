@@ -17,11 +17,13 @@ public class Checkpoint : MonoBehaviour
             {
                 ph.respawnPoint = transform.position;
 
-                bool canHeal = lastHealed != this;
-                if (canHeal && ph.currentSegment % ph.segmentsPerHeart != 0)
+                if (lastHealed != this)
                 {
-                    int maxSegments = ph.maxHearts * ph.segmentsPerHeart;
-                    ph.Heal(maxSegments - ph.currentSegment);
+                    if (ph.currentSegment % ph.segmentsPerHeart != 0)
+                    {
+                        int maxSegments = ph.maxHearts * ph.segmentsPerHeart;
+                        ph.Heal(maxSegments - ph.currentSegment);
+                    }
                     lastHealed = this;
                 }
 

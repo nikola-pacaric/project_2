@@ -60,7 +60,7 @@ MonoBehaviour:
     CustomLookAtTarget: 0
   Lens:
     FieldOfView: 80
-    OrthographicSize: 9
+    OrthographicSize: 8.4375
     NearClipPlane: 0.3
     FarClipPlane: 1000
     Dutch: 0
@@ -142,4 +142,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraZoomHelper
   vcam: {fileID: 2469849072342075955}
-  zoomSpeed: 0.5
+  zoomDuration: 4
+  useUnscaledTime: 0
+  zoomPresets:
+  - {x: 960, y: 540}
+  - {x: 640, y: 360}
+  - {x: 480, y: 270}
+  - {x: 384, y: 216}
+  - {x: 320, y: 180}

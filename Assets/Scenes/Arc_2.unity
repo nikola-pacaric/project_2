@@ -133,7 +133,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 704819039272045288, guid: a550f916bae4ae64c808ebf2e2f5d753, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -10.20274
+      value: -11.20274
       objectReference: {fileID: 0}
     - target: {fileID: 704819039272045288, guid: a550f916bae4ae64c808ebf2e2f5d753, type: 3}
       propertyPath: m_LocalPosition.z
@@ -1916,11 +1916,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4338476050232792142, guid: 3c0250efff1fe764b868cca09c25e864, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 16.977303
+      value: 15.9773035
       objectReference: {fileID: 0}
     - target: {fileID: 4338476050232792142, guid: 3c0250efff1fe764b868cca09c25e864, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 5.201813
+      value: 5.2011676
       objectReference: {fileID: 0}
     - target: {fileID: 4338476050232792142, guid: 3c0250efff1fe764b868cca09c25e864, type: 3}
       propertyPath: m_LocalPosition.z
@@ -3462,7 +3462,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 704819039272045288, guid: a550f916bae4ae64c808ebf2e2f5d753, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -10.20274
+      value: -11.20274
       objectReference: {fileID: 0}
     - target: {fileID: 704819039272045288, guid: a550f916bae4ae64c808ebf2e2f5d753, type: 3}
       propertyPath: m_LocalPosition.z
@@ -8908,6 +8908,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8707914812356761568, guid: ba9dfe6f1237ebe408be3280d069cd8c, type: 3}
   m_PrefabInstance: {fileID: 1580662242}
   m_PrefabAsset: {fileID: 0}
+--- !u!20 &1585698859 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 4968690113971924493, guid: 3c0250efff1fe764b868cca09c25e864, type: 3}
+  m_PrefabInstance: {fileID: 281910471}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1596224129
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -10196,24 +10201,12 @@ MonoBehaviour:
         - m_Target: {fileID: 1751698182764729623}
           m_TargetAssemblyTypeName: CameraZoomHelper, Assembly-CSharp
           m_MethodName: SetZoom
-          m_Mode: 4
+          m_Mode: 3
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
             m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
+            m_IntArgument: 1
             m_FloatArgument: 10
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-        - m_Target: {fileID: 1751698182764729623}
-          m_TargetAssemblyTypeName: CameraZoomHelper, Assembly-CSharp
-          m_MethodName: SetOffsetX
-          m_Mode: 4
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 7
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
@@ -10229,24 +10222,12 @@ MonoBehaviour:
         - m_Target: {fileID: 1751698182764729623}
           m_TargetAssemblyTypeName: CameraZoomHelper, Assembly-CSharp
           m_MethodName: SetZoom
-          m_Mode: 4
+          m_Mode: 3
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
             m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
+            m_IntArgument: 2
             m_FloatArgument: 9
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-        - m_Target: {fileID: 1751698182764729623}
-          m_TargetAssemblyTypeName: CameraZoomHelper, Assembly-CSharp
-          m_MethodName: SetOffsetX
-          m_Mode: 4
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
@@ -10783,7 +10764,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 704819039272045288, guid: a550f916bae4ae64c808ebf2e2f5d753, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -10.20274
+      value: -11.20274
       objectReference: {fileID: 0}
     - target: {fileID: 704819039272045288, guid: a550f916bae4ae64c808ebf2e2f5d753, type: 3}
       propertyPath: m_LocalPosition.z
@@ -12501,7 +12482,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 704819039272045288, guid: a550f916bae4ae64c808ebf2e2f5d753, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -19.20274
+      value: -20.20274
       objectReference: {fileID: 0}
     - target: {fileID: 704819039272045288, guid: a550f916bae4ae64c808ebf2e2f5d753, type: 3}
       propertyPath: m_LocalPosition.z
@@ -17974,9 +17955,17 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 177043528752585946, guid: a343ce613b763d441a5f96bb999ce986, type: 3}
+      propertyPath: scaleWithZoom
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 177043528752585946, guid: a343ce613b763d441a5f96bb999ce986, type: 3}
       propertyPath: cameraTransform
       value: 
       objectReference: {fileID: 281910472}
+    - target: {fileID: 423924658389927833, guid: a343ce613b763d441a5f96bb999ce986, type: 3}
+      propertyPath: zoomCamera
+      value: 
+      objectReference: {fileID: 1585698859}
     - target: {fileID: 423924658389927833, guid: a343ce613b763d441a5f96bb999ce986, type: 3}
       propertyPath: cameraTransform
       value: 
@@ -17985,6 +17974,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Background
       objectReference: {fileID: 0}
+    - target: {fileID: 6889040899049810541, guid: a343ce613b763d441a5f96bb999ce986, type: 3}
+      propertyPath: zoomCamera
+      value: 
+      objectReference: {fileID: 1585698859}
     - target: {fileID: 6889040899049810541, guid: a343ce613b763d441a5f96bb999ce986, type: 3}
       propertyPath: cameraTransform
       value: 
@@ -18074,7 +18067,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2469849072342075955, guid: 5bee71aa8b904fc4abaa2d62a66c7ed6, type: 3}
       propertyPath: Lens.OrthographicSize
-      value: 9
+      value: 8.4375
       objectReference: {fileID: 0}
     - target: {fileID: 2469849072342075955, guid: 5bee71aa8b904fc4abaa2d62a66c7ed6, type: 3}
       propertyPath: Target.TrackingTarget
