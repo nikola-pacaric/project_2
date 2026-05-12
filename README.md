@@ -7,7 +7,7 @@ Compared with Project 1, this project shows a more Unity-native approach to arch
 ![Project 2 gameplay loop](docs/media/project-2-gameplay-loop.gif)
 
 - [Gameplay screenshot](docs/media/project-2-gameplay.png)
-- [30-second demo video with transitions](docs/media/project-2-demo.mp4)
+- [Gameplay-only demo video](docs/media/project-2-demo-gameplay.mp4)
 
 ## Related Repositories
 - [Project 2 Source Repository](https://github.com/nikola-pacaric/project_2) - this Unity source project.
