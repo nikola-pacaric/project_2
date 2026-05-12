@@ -1,10 +1,10 @@
 # PLANNING.md — 2D Platformer (Project 2)
 
 ## U toku
-- [ ] Polish: ground level design
-- [ ] Polish: cherry collectables
+- [x] Polish: ground level design
+- [x] Polish: cherry collectables
 - [ ] Sistemi koji fale (see below)
-- [ ] Arc_2 ending cinematic (see below)
+- [x] Arc_2 ending cinematic (see below)
 
 ---
 
@@ -38,71 +38,6 @@
 - [x] Igrač stane na pressure plate → platforma se pomeri i otvori put
 - [x] Napreduje do: plate na jednom mestu, platforma na drugom → moraš brzo da stigneš
 - [x] Finalni korak: gurni PushableBox na plate da zaključaš platformu u poziciji trajno
-
----
-
-## Arc_2 ending cinematic — close-out before boss-room wall
-
-**Trigger:** invisible trigger placed *before* the unbreakable wall, so the player visibly stops short of it and the camera frames the wall.
-
-**Flow (high level):**
-1. Player enters trigger → cinematic kicks in, controls cut.
-2. Camera detaches from player, slowly pans + zooms to wall while screen partially darkens.
-3. Music fades to silence.
-4. "Congratulations! You finished the game... TO BE CONTINUED!" text pops over the darkened scene (wall still visible behind).
-5. Hold a few seconds, then normal `GameOverUI` panel takes over (auto-submit + name input).
-
-### Implementation checklist
-
-#### Script: `Assets/Scripts/EndingCinematic.cs`
-- [ ] `[RequireComponent(typeof(Collider2D))]` — trigger collider, `Reset()` forces `isTrigger = true`
-- [ ] Inspector slots:
-  - `playerTag` (default `"Player"`)
-  - `playerScriptsToDisable: MonoBehaviour[]` — wire `PlayerController` + `PlayerCombat`
-  - `vcam: CinemachineCamera`
-  - `cameraFocus: Transform` — empty GO placed at desired camera end position
-  - `cameraMoveDuration` (~2.5s), `zoomTargetSize` (~3)
-  - `dimGroup: CanvasGroup` — full-screen semi-transparent black image
-  - `dimTargetAlpha` (~0.65), `dimFadeDuration` (matches camera move)
-  - `messageGroup: CanvasGroup` — "Congratulations! ... TO BE CONTINUED!" text
-  - `messageFadeDuration` (~0.4s), `messageHoldDuration` (~3s)
-  - `musicFadeDuration` (~2s)
-  - `gameOverUI: GameOverUI`
-- [ ] `triggered` bool guard (fires once)
-- [ ] On player enter trigger:
-  1. `RunTimer.Instance?.Pause()` — timer stops *now*, before cinematic time accrues
-  2. Disable each script in `playerScriptsToDisable` (their `OnDisable` cuts input actions)
-  3. Zero `Rigidbody2D.linearVelocity`; set Animator `Speed = 0f`
-  4. `vcam.Follow = null; vcam.LookAt = null`
-  5. Concurrent coroutines (use `Time.unscaledDeltaTime` everywhere):
-     - Camera move: lerp `vcam.transform.position` → `cameraFocus.position` (preserve z) + lerp `Lens.OrthographicSize` → `zoomTargetSize`, smoothstep ease
-     - Dim fade: `dimGroup.alpha` 0 → `dimTargetAlpha`
-     - Music fade: `AudioManager.Instance.FadeOutMusic(musicFadeDuration)` (see below)
-  6. After all three finish: fade `messageGroup.alpha` 0 → 1
-  7. `WaitForSecondsRealtime(messageHoldDuration)`
-  8. `gameOverUI.Show(GameManager.Instance?.Score ?? 0)`
-     - Note: `GameOverUI.Show` already sets `Time.timeScale = 0` and pauses the timer (no-op since we already paused). Cinematic itself does NOT touch `timeScale` — uses unscaled time so it keeps running at normal speed.
-
-#### Audio support
-- [ ] Add `AudioManager.FadeOutMusic(float duration)` — coroutine that lerps `musicSource.volume` to 0 over duration. Local fade only, does NOT touch mixer params (preserves user's volume preference). Restored next time `PlayMusic` is called (it sets `volume` from library).
-
-#### Scene work (Arc_2.unity)
-- [ ] Add invisible trigger GameObject in front of the wall:
-  - `BoxCollider2D` (isTrigger), sized so player walks into it before reaching the wall sprite
-  - `EndingCinematic` component
-- [ ] Empty `CameraFocus` GameObject placed where camera should end up (centered on wall, at desired zoom framing)
-- [ ] Cinematic UI Canvas (Screen Space Overlay, sortingOrder ≥ 33000 so it's above `ScreenFader`'s 32000):
-  - Child 1: `DimGroup` — full-stretch `Image` (black, alpha 1) + `CanvasGroup` (start alpha 0)
-  - Child 2: `MessageGroup` — TMP text "Congratulations! You finished the game... TO BE CONTINUED!" + `CanvasGroup` (start alpha 0)
-- [ ] Wire all Inspector references on `EndingCinematic` (vcam, focus, dim group, message group, GameOverUI, player scripts)
-
-#### Verification
-- [ ] Player approaches wall → stops short → no input accepted (movement, jump, attack)
-- [ ] Camera smoothly pans + zooms; screen darkens to ~65% (wall still readable behind)
-- [ ] Music fades out cleanly, no abrupt cut
-- [ ] Message appears after camera settles, holds, then GameOverUI takes over
-- [ ] Run timer value frozen at cinematic start (not at GameOver start) — visible on GameOver panel
-- [ ] Restart from GameOver returns to fresh Arc_1 with full state reset (existing flow, just verify)
 
 ---
 
@@ -224,11 +159,11 @@ UGS Leaderboards auto-genericka šema:
 - [x] `InitializeAsync` okružiti try/catch — failed init (offline) ne sme da sruši Start Screen; Leaderboard dugme u tom slučaju prikaže "Offline"
 
 ### 6. Deploy — WebGL + GitHub Pages
-- [ ] Unity WebGL build settings: Brotli compression, default ili minimalni custom template
-- [ ] Build output → GitHub Pages (odvojen repo ili `gh-pages` branch ovog repo-a — odluka pri deploy-u)
-- [ ] Configure GitHub Pages source (branch + folder)
-- [ ] Verifikovati: UGS Authentication + Leaderboards rade iz WebGL build-a (nema CORS config potrebnog — SDK hendluje)
-- [ ] Smoke test: open page → init fires (anonimni sign-in) → klik Leaderboard (prazan na početku) → Play → završi game → submit name → refresh Leaderboard → vidiš entry
+- [x] Unity WebGL build settings: Brotli compression, default ili minimalni custom template
+- [x] Build output → GitHub Pages (odvojen repo ili `gh-pages` branch ovog repo-a — odluka pri deploy-u)
+- [x] Configure GitHub Pages source (branch + folder)
+- [x] Verifikovati: UGS Authentication + Leaderboards rade iz WebGL build-a (nema CORS config potrebnog — SDK hendluje)
+- [x] Smoke test: open page → init fires (anonimni sign-in) → klik Leaderboard (prazan na početku) → Play → završi game → submit name → refresh Leaderboard → vidiš entry
 
 ---
 

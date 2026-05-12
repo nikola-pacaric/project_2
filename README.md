@@ -59,8 +59,6 @@ The player can defeat enemies with:
 - Stomp attacks
 - Melee slash attacks
 
-The newer combat model reduces dependence on tag-only collision checks and makes future enemy or boss attacks easier to add.
-
 ### Health, Damage, and Checkpoints
 The project includes a heart-based player health system with segmented hearts, damage feedback, respawning, and checkpoint state.
 
@@ -79,7 +77,6 @@ Implemented collectables include:
 - Diamonds
 - Cherries
 - Acorns
-- Life gems / health pickups
 
 The score updates during the run and is submitted at game over.
 
@@ -158,8 +155,6 @@ Implemented:
 - Unity Gaming Services leaderboard integration
 
 In progress / planned:
-- Final WebGL deployment polish
-- Arc 2 ending cinematic scene wiring
 - Additional level arcs and boss content as future updates
 - Optional offline leaderboard fallback if needed
 
