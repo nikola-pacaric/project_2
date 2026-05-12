@@ -3,6 +3,12 @@ Project 2 is a Unity 6 2D platformer built as a portfolio project and as the nex
 
 Compared with Project 1, this project shows a more Unity-native approach to architecture. Project 1 used a separate Node.js / Express / MongoDB backend for leaderboard persistence. Project 2 moves the leaderboard into Unity Gaming Services, using Unity Authentication and Unity Leaderboards directly from the Unity client.
 
+## Media
+![Project 2 gameplay loop](docs/media/project-2-gameplay-loop.gif)
+
+- [Gameplay screenshot](docs/media/project-2-gameplay.png)
+- [30-second demo video with transitions](docs/media/project-2-demo.mp4)
+
 ## Related Repositories
 - [Project 2 Source Repository](https://github.com/nikola-pacaric/project_2) - this Unity source project.
 - [Project 2 Web Build](https://github.com/nikola-pacaric/project_2_Web_Build) - exported Unity WebGL build repository.

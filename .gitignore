@@ -100,3 +100,7 @@ InitTestScene*.unity*
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Local media review scratch files
+/docs/media/_review/
+/docs/media/_png_candidates/
